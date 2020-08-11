@@ -1,0 +1,362 @@
+<html>
+<head>
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
+    <!-- <script src="http://transformellae.cloudno.de/socket.io/socket.io.js"></script> -->
+    <script>
+    // dynamically load socket io from a remote url
+    // var socketserver = "http://localhost:8080"
+    // var socketserver = "http://transformellae.cloudno.de" // set to "" for server pf hjtml
+    var socketserver = "";
+    var socketscript = document.createElement('script');
+    socketscript.onload = function () {
+        console.log('socket io src loaded');
+    };
+    socketscript.src  = socketserver+'/socket.io/socket.io.js';
+    document.head.appendChild(socketscript); //or something of the likes
+
+    localStorage.debug =''; // socket.io debug set to *
+
+
+    var i_am_master = false;
+    var passcode = null;
+    var master_poll_handle = null;
+    var master_push_interval = 1000;
+    var state  = {
+            time: 0,
+            slide: 0
+    };
+
+    var breath_box, breath_button;
+    var square = 200;
+    var breathing_slaves = {};
+
+    var socket;
+
+window.onload = function() {
+    // localStorage.debug='*';
+
+        breath_box = document.getElementById('breathing');
+        // resize to fill
+        // breath_box.style.height = window.innerHeight-15+"px";
+        // breath_box.style.width = window.innerWidth-15+"px";
+        breath_button = document.getElementById('breath_button');
+        breath_button.style.top = (window.innerHeight/2)-breath_button.offsetHeight/2;
+        breath_button.style.left = (window.innerWidth/2)-breath_button.offsetWidth/2;
+
+
+    socket = io.connect(socketserver);
+    socket.on('connect', function () {
+        // hmm, sometimes we never get here
+        console.log('connected to server on connect');
+        // setTimeout(function(){socket.emit('get_net_graph');}, 1000);
+        socket.emit('init');
+    });
+
+    // this is the first response after init.
+    socket.on('state', function (state) {
+        if (i_am_master) {
+            console.log('got state as master, ignoring');
+            return;
+        }
+        console.log('got state as slave', state);
+        slaveHandleState(state);
+    });
+    // this comes when master wants to push users to a certain slide
+    // often this is the slide after current when current is a permanent wait
+    socket.on('force', function (state) {
+        if (i_am_master) {
+            console.log('got force as master, ignoring');
+            // just for debug for now
+            document.getElementById('slide').innerText = state.slide;
+            return;
+        }
+        console.log('got force as slave', state);
+        slaveHandleForce(state);
+    });
+    // for now just jump to that slide
+    function slaveHandleState(newstate) {
+        // this happens on init
+        state = newstate;
+        document.getElementById('slide').innerText = state.slide;
+    }
+    function slaveHandleForce(newstate) {
+        state = newstate;
+        document.getElementById('slide').innerText = state.slide;
+        /*
+        Do change slide
+        */
+    }
+
+    socket.on('debug', function(data){ console.log('debug', data) });
+
+
+    //
+    // breath
+    //
+    socket.on('breathing', function(data) {
+        console.log('got breath',data);
+        breathing_slaves[data.id] = 1;
+        updateBreathing(data.id);
+    });
+    socket.on('breathing_init', function(data) {
+        console.log('breathing_init', data);
+        function slowAddNewId(idx) {
+            if (idx >= data.ids.length) return;
+            setTimeout(function(){
+                updateBreathing(data.ids[idx]);
+                slowAddNewId(idx+1);
+            },  Math.random() * (4000/*max*/ - 1000 /*min*/) + 1000 );
+        }
+        if (data.ids.length > 0)
+            slowAddNewId(0);
+    });
+    socket.on('breathing_in_sync', function(data) {
+        console.log('breathing_in_sync',data);
+        breath_button.className += ' flash'; //display = 'none';
+        breath_button.addEventListener("animationend", fn = function(e){
+            e.target.className = e.target.className.replace(/\s*flash/g, '');
+            e.target.style.display = 'none';
+            e.target.removeEventListener(e.type, fn, false);
+        }, false);
+
+        var run_n_times = 5;
+        function end_sequence(n) {
+            if (n == run_n_times) {
+                //end
+                var elem_ids = Object.keys(breathing_slaves);
+                for (var i=0; i<elem_ids.length; i++) {
+                    breathElement(document.getElementById(elem_ids[i]))
+                }
+                setTimeout(function(){
+                    breath_box.style.backgroundColor = "#000";
+                    breath_box.className += ' flash';
+                },2000);
+            }
+            else {
+                var elem_ids = Object.keys(breathing_slaves);
+                for (var i=0; i<elem_ids.length; i++)
+                    breathElement(document.getElementById(elem_ids[i]))
+                setTimeout(function(){end_sequence(n+1)}, 3000/*time needs to match animationlength*/);
+            }
+        }
+
+        end_sequence(1);
+    });
+} /* END window.onload */
+
+    function breath_button_out() {
+        breath_button.className = 'fadeOut'; //display = 'none';
+        breath_button.addEventListener("animationend", fn = function(e){
+            e.target.className = e.target.className.replace(/\s*fade\S+/g, '');
+            e.target.removeEventListener(e.type, fn, false);
+            breath_button_in();
+        }, false);
+    }
+    function breath_button_in() {
+        breath_button.className = 'fadeIn'; //display = 'none';
+        breath_button.addEventListener("animationend", fn = function(e){
+            e.target.className = e.target.className.replace(/\s*fade\S+/g, '');
+            e.target.removeEventListener(e.type, fn, false);
+        }, false);
+    }
+    function breath() {
+        socket.emit('breath', socket.id);
+        breath_button_out();
+    }
+
+    var breath_template = document.createElement('div');
+    breath_template.className             = 'breath';
+    function updateBreathing(id) {
+        var elem = document.getElementById(id);
+        if (elem) {
+            console.log("breath have",id);
+        }
+        else {
+            console.log("breath add",id);
+            elem              = breath_template.cloneNode();
+            elem.style.width  = square+'px';
+            elem.style.height = square+'px';
+            if (id == socket.id)
+                elem.style.backgroundColor = "#635"
+            elem.innerText    = id;
+            elem.id           = id;
+            // create elem
+            breath_box.appendChild(elem);
+            elem.className = 'breath';
+
+            // resize until last square close to bottom
+            // var bottom = breath_box.offsetTop + breath_box.offsetHeight;
+            var bot = window.innerHeight;
+            var right = window.innerWidth;
+            var elem_bot = elem.offsetTop+elem.offsetHeight;
+            var elem_right = elem.offsetLeft+elem.offsetWidth;
+            if (elem_bot > bot || elem_right > right) {
+                // elem too large, overflows
+                // n_high = parseInt(elem.offsetTop/elem.offsetHeight)+1;
+                // n_wide = parseInt(elem.offsetLeft/elem.offsetWidth)+1;
+                // miss_high = Math.abs( (elem_bot-bot)    /n_high );
+                // miss_wide = Math.abs( (elem_right-right)/n_wide );
+                // square -= miss_wide > miss_high ? miss_wide+10 : miss_high+10;
+                while (elem.offsetTop+elem.offsetHeight > bot || elem.offsetLeft+elem.offsetWidth>right) {
+                    square -= 10;
+                    for (var i = 0; i < breath_box.childNodes.length; i++) {
+                        breath_box.childNodes[i].style.width = square+'px';
+                        breath_box.childNodes[i].style.height = square+'px';
+                    }
+                }
+            }
+            else if (elem_bot < bot-10 || elem_right < right-10) {
+                // elem too small, undeflow
+                while (elem.offsetTop+elem.offsetHeight < bot-10 && elem.offsetLeft+elem.offsetWidth<right-10) {
+                    square += 10;
+                    for (var i = 0; i < breath_box.childNodes.length; i++) {
+                        breath_box.childNodes[i].style.width = square+'px';
+                        breath_box.childNodes[i].style.height = square+'px';
+                    }
+                }
+            }
+
+        }
+        breathElement(elem);
+
+    }
+    function breathElement(elem) {
+        elem.className += ' flash';
+        elem.addEventListener("animationend", fn = function(e){
+            e.target.className = e.target.className.replace(/\s*flash/g, '');
+            e.target.removeEventListener(e.type, fn, false);
+        }, false);
+    }
+    //
+    // MASTER
+    //
+    function masterForce(slide) {
+        if (!i_am_master) return;
+        state.time  = new Date().getTime();
+        state.slide = slide;
+        socket.emit('set_force', {
+            passcode: passcode,
+            slide: state.slide
+        });
+    }
+    function updateMasterState () {
+        socket.emit('set_state', {
+            passcode: passcode,
+            slide: state.slide
+        });
+        state.slide += 1;
+    }
+    function updateMasterSetBreathingSync () {
+        if (!i_am_master) return;
+        socket.emit('set_breath_sync', {
+            passcode: passcode
+        });
+        state.slide += 1;
+    }
+    function toggleMaster () {
+        i_am_master = !i_am_master;
+        document.getElementById('am_i_master').innerText = i_am_master ? "true" : "fasle";
+        if (i_am_master) {
+            passcode = document.getElementById('passcode').value;
+            master_poll_handle = window.setInterval(updateMasterState, master_push_interval);
+        }
+        else {
+            window.clearInterval(master_poll_handle);
+        }
+    }
+    function showMasterControls() {
+        var e = document.getElementById('master_toggle');
+        var b = document.getElementById('master_controls');
+        if (b.style.display == 'block') {
+            e.innerText     = '+';
+            b.style.display = "none";
+        }
+        else {
+            e.innerText     = "—";
+            b.style.display = "block";
+        }
+    }
+
+    </script>
+    <style>
+    body { margin:0; padding:0; font-family: monospace; font-size: 1.4em;}
+    .breath {
+        background-color: #eee;
+        background-color: #333;
+        color: #eee;
+        overflow: hidden;
+        text-align: center;
+        display: inline-block;
+        /*border: 1px solid #000;*/
+        opacity: 0.1;
+        /*
+        align-items: center;
+        display: flex;*/
+    }
+    .flash{
+        /*animation: flash 2.4s ease-out normal;*/
+        animation: flash 2.4s steps(32) normal;
+        animation-iteration-count: 1;
+    }
+    .fadeOut { animation: fadeOut 2.0s steps(32) normal; }
+    .fadeIn { animation: fadeIn 0.9s steps(32) normal; }
+    /*@keyframes flash {
+        0% { background-color:none;}
+        65% { background-color:#666;}
+        100% {background-color:none;}
+    }*/
+    @keyframes fadeOut {
+        0% { opacity: 1.0;}
+        40% { opacity: 0.1;}
+        100% { opacity: 0.1;}
+    }
+    @keyframes fadeIn {
+        0% { opacity: 0.1;}
+        100% { opacity: 1.0;}
+    }
+    @keyframes flash {
+        0% { opacity: 0.1;}
+        65% { opacity: 1.0;}
+        100% { opacity: 0.1;}
+    }
+    #master_controls {
+        position: absolute;
+        top:00px; left: 30px;
+        background-color: rgb(255,255,255,0.5);
+        padding: 30px;
+        z-index:9999;
+    }
+    #master_toggle {
+        position: fixed;
+        z-index: 9999;
+        padding: 4px;
+        background-color: #fff;
+    }
+    #breath_button {
+        position: absolute;
+        z-index: 9999;
+        font-size: 4em;
+        left:33%;
+        top:44%;
+    }
+    #breathing {
+        z-index: 10;
+    }
+    </style>
+</head>
+<span id=master_toggle onclick="showMasterControls()">+</span>
+<div id=master_controls style="display:none">
+MASTER<BR>
+<button onclick="toggleMaster()">I am master (<span id=am_i_master>false</span>)</button> <input id=passcode type=text size=15 value=AusADUTNAOW> (passcode)<br>
+<br>
+<button onclick="masterForce(22)">test force slide: 22</button><br>
+<br>
+<button onclick="updateMasterSetBreathingSync()">test force end breathing sequence</button><br>
+<br>
+<span id=slide>0</span>
+<br>
+</div>
+<button id=breath_button onclick="breath()">breath</button>
+<div id=breathing style="width:100%; height:100%; font-size: 0.6em;"></div>
+<!-- <iframe src="http://apple.com" width=100% height=100% style="z-index:-1; opacity:0.2; position:absolute;left:0;top:0;"> -->
+</html>

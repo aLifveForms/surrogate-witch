@@ -1,0 +1,49 @@
+<html>
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+    body {
+        font-family: 'Helvetica';
+        color: #666;
+        background-color: #e0ffe0;
+    }
+    </style>
+</head>
+<body>
+    <script>
+
+    </script>
+<table>
+    <td valign=top>
+        Edit script:<br>
+<form id=scriptedit action=submitscript  method=post>
+<input type=submit value="submit"><br>
+<textarea name=script cols=88 rows=35 style='background-color: #ffffe0; color: #000'>
+!!SCRIPT!!
+</textarea>
+<br><input type=submit value="submit">
+</form>
+    </td>
+    <td>&nbsp;&nbsp;&nbsp;</td>
+    <td valign=top>
+
+Upload files:<br>
+<form id="uploadForm"
+    enctype="multipart/form-data"
+    action="/upload"
+    method="post">
+1. <input type="file" name="files" value="select" multiple /><br>
+2. <input type="submit" value="Upload Files" name="submit"><br>
+</form>
+<br>
+Delete files:<br>
+<form id=delete_files method=post action="/delete">
+!!FILELISTHTML!!
+<br><input type="submit" value="Delete"/>
+</form>
+<br>
+<span id = "status"></span>
+</td>
+</table>
+</body>
+</html>

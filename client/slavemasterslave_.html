@@ -1,0 +1,1582 @@
+<html>
+<body>
+    <script>
+var LIVE = false;
+
+// BUGBUG: transparent bacgkround should show hide site
+
+/************************************************
+ SET DEFAULTS
+*************************************************/
+var script_url           = "https://pad.riseup.net/p/fanboy/export/txt";
+var script_url           = "/client/script.txt";
+//var control_server       = "http://localhost:8080"; // for this server
+//var control_server       = "http://transformellae.cloudno.de"
+var control_server       = "";
+//var frame_apple_url      = LIVE ? "http://apple.com/" : "/client/apple.com/"
+// Apple no longer allowing iframe loading
+var frame_apple_url      = "/client/apple.com/"
+var i_am_master          = false;
+var master_poll_handle   = null;
+var master_push_interval = 1000;
+var show_slide_prev      = false; //show previous slide in ui?
+var default_popup_width  = 250;
+var default_popup_height = 250;
+
+// for transmediale installation:
+var url_items =  location.href.match(/\/device\/(\d+)\/start\/(\d+)\/end\/(\d+)/)
+var device_id = url_items ? url_items[1] : null
+var start_at  = url_items ? url_items[2] : null
+var end_at    = url_items ? url_items[3] : null
+var load_paused = true
+
+var DEBUG          = !LIVE;
+var DEBUG_POLL     = !LIVE;
+localStorage.debug = ''; // socket.io debug set to *
+
+// Special Breath files
+// we play audio 1 during breath sequence
+// when mp3 one has finished
+// we play audio 2 after a certain N MS have passed
+// breath_audio_1_url    = '/client/breath_audio_1.wav';
+// breath_audio_2_url    = '/client/breath_audio_2_7.wav';
+// breath_audio_1_url    = '/client/inhale_exhale.mp3';
+// breath_audio_2_url    = '/client/inhale_exhale_2.mp3';
+breath_audio_1_url    = '/client/inhalexhale_128.mp3';
+breath_audio_2_url    = '';
+
+// browser starts with audio 2. When a breath init comes in that Indicates
+// this is a new user, and it switches to audio 1
+// when audio one finishes it switches to audio 2
+
+var position           = 0;
+var master_state_ready = false;
+var state              = { time: 0, slide: 0 };
+var breathing_slaves   = {};
+var script_recieved    = false;
+var socket;
+
+/************************************************
+ LOAD SOCKET.IO CODE
+*************************************************/
+var socket_script    = document.createElement('script');
+socket_script.onload = function () { log('socket_script','loaded') };
+socket_script.src    = control_server+'/socket.io/socket.io.js';
+document.head.appendChild(socket_script);
+
+function setup_socket() {
+    if (device_id && start_at && end_at) {
+        // transmediale version
+        socket = io.connect(control_server, {
+            query: 'device_id='+device_id
+        });
+        socket.on('device_start', function(){
+            console.log('got start')
+            //window.location.reload()
+            socket.emit('init')
+            loading_off()
+        })
+        socket.on('device_stop', function(){
+            console.log('got stop')
+            master_state_ready = false
+            toggle_hide()
+            loading_on()
+            audio_stop()
+            frame_image.innerHTML = ''
+        })
+    }
+    else {
+        socket = io.connect(control_server);
+    }
+
+    // comes after we connect
+    socket.on('connect', function () {
+        log('socket','connected');
+        // for transmediale
+        // require plug in for this
+        if (!device_id)
+            socket.emit('init');
+    });
+    // state comes after we send init
+    socket.on('state', function (newstate) {
+        // this is the first response after init.
+        log('socket','got state', newstate);
+        state = newstate;
+        master_state_ready = true;
+        // Only change position activily if not master and state.time != 0
+        change_script_position(newstate.slide); // position beomces slide
+        if (i_am_master) {
+            highlight_init_step();
+        }
+        if (newstate.time == 0)
+            return; // when 0 from server let clients go their own route
+    });
+    socket.on('force', function (newstate) {
+        if (i_am_master) {
+            // master sent the force so can ignore
+            document.getElementById('slide').innerText = newstate.slide;
+            return;
+        }
+        log('socket','got force', newstate);
+        state = newstate;
+        change_script_position(newstate.slide);
+    });
+    socket.on('debug', function(data){ log('socket', 'debug', data) });
+    // info after get_info, sent by master
+    socket.on('info', function(data){
+        log('socket', 'info', data)
+        process_info(data);
+    })
+}
+
+
+
+/************************************************
+ EXECUTE AFTER PAGE, CODE & SCRIPT ALREADY LOADED
+*************************************************/
+window.onload = function () {
+    document.getElementById('frame_apple').src = frame_apple_url;
+    // fires when dom ready, but not on back button
+    if (is_iOS)
+        document.getElementById('controlbox').style.display = 'none';
+    loading_on(); // loading message
+    parse_hash(); // gets script if needbe. sets master controls if needbe
+    setup_socket();
+    conductor();
+}
+
+/************************************************
+ EXECUTE ON HASH CHANGE
+ Used to become master or change script URL
+*************************************************/
+window.onhashchange = parse_hash;
+
+// Get initial script
+// can be changed with hash
+var script;
+var script_attempts = 0;
+var script_get_n = 10;
+function parse_script(script_text) {
+    script = script_text.split("\n");
+    // for transmediale:
+    if (device_id && start_at && end_at) {
+        script = script.slice(start_at-1,end_at-1)
+    }
+    if (i_am_master)
+        populate_slidelist();
+    if (script.length > 3)
+        script_recieved = true;
+    else if (script_attempts<script_get_n) {
+        log('script', 'attempt',script_attempts);
+        script_attempts += 1;
+        window.setTimeout(function(){
+            http_get(script_url, parse_script);
+        }, 5000);
+    }
+    else {
+        script=['slave witch fork fail'];
+        script_recieved = true; // will show failure
+    }
+}
+http_get(script_url, parse_script);
+
+
+/************************************************
+ SETUP HIDE KEYBOARD SHORTCUT
+ frame_apple and other container vars loaded by
+ conductor after window.onload
+*************************************************/
+
+function toggle_hide() {
+    var frame_apple        = document.getElementById('frame_apple');
+    var frame_keepkeyboard = document.getElementById('frame_keepkeyboard');
+    var frame_breath       = document.getElementById('frame_breath');
+    var controlbox         = document.getElementById('controlbox');
+
+    if (controlbox.style.display == '' || controlbox.style.display == "block") {
+        log('hide','on');
+        frame_apple.style.display        = "block";        // show apple.com
+        controlbox.style.display         = "none";         // hide control box
+        frame_breath.style.display       = "none";
+        frame_keepkeyboard.style.display = "block";        // but keep keyboard ctl away from apple.com
+        if (loading_is_on)
+            loading_hide();
+    }
+    else {
+        log('hide','off');
+        if (!loading_is_on)
+            frame_apple.style.display         = "none";
+        // prevent clicks which would loose keypress within iframe
+        // hide control but keep keyboard/mouse away from apple.com
+        controlbox.style.display         = "block";
+        if (breathing_active)
+            frame_breath.style.display   = "block";
+        frame_keepkeyboard.style.display = "none";
+        if (loading_is_on)
+            loading_show();
+    }
+}
+window.addEventListener("keypress", function (e) {
+    if (e.charCode == "32" /*space*/|| e.keyCode == 27/*ESC*/) {
+        log('keypress','hide/unhide');
+        toggle_hide();
+    }
+    else {
+        log('keypress','unknown',e);
+    }
+});
+
+
+
+/************************************************
+ MASTER FUNCTIONS IN onload AND onhashchange
+ parse_hash();
+ slave_get_init();
+ setup_poll();
+*************************************************/
+
+function parse_hash() {
+    var hash = window.location.hash.substr(1);
+    if (!hash) return;
+    if (hash.substr(0,4) == 'http') {
+        log('onhashchange', 'new script', hash);
+        http_get(hash, parse_script)
+    }
+    else if (hash.substr(0,6) == "master") {
+        master_passcode = hash.substr(6);
+        i_am_master     = true;
+        log('onhashchange', 'i am master', master_passcode);
+        setup_master_control();
+        if (script && script.length > 0)
+            populate_slidelist();
+    }
+}
+
+
+
+
+
+
+
+/************************************************
+ FUNCTIONS IMPORTANT TO ABOVE
+************************************************/
+function setup_master_control() {
+    if (i_am_master != true) return;
+    document.getElementById('master').style.display = "block";
+}
+var images = [];
+function preloadimages(script) {
+    log('preloadimages','begin', script.length);
+    // function preloadimage(url) {
+    //     log('preloadimage', url);
+    //     var img     = new Image();
+    //     img.src     = url;
+    //     img.onload  = function(e) {log('preloadimage','completed',e)}
+    //     img.onerror = function() {err('preloadimage',url)}
+    // }
+    for (var i = position; i < script.length; i++ ) {
+        var line = script[i];
+        var url = line.split(" ")[0];
+        // if ( (url.substr(0,4) == "http" || url.substr(0,1) == "/") && url_is_img(url))
+        //     preloadimage(url);
+        if (line.substr(0,2) == "//") {
+            continue
+        }
+        else if (line.substr(0,5) == "video") {
+            var urls = line.split(/\s+/);
+            url = is_iOS ? urls[2] : urls[1];
+            if (url == 'about:blank')
+                continue
+            log('preloadvideo', is_iOS, url);
+            if (is_iOS) {
+                var img     = new Image();
+                img.src     = url;
+                img.onload  = function(e) {log('preloadvideo_iOS','loaded',e.target.src)}
+                img.onerror = function(e) {err('preloadvideo_iOS',e.target.src)}
+                images.push(img);
+            }
+            else {
+                var vid          = document.createElement("VIDEO");
+                vid.src          = url;
+                vid.onloadeddata = function(e) {log('preloadvideo','loadeddata',e.target.src)}
+                vid.onload       = function(e) {log('preloadvideo','loaded',e.target.src)}
+                vid.onerror      = function(e) {err('preloadvideo',e.target.src)};
+                vid.load();
+                images.push(vid);
+
+            }
+        }
+        else if ( (url.substr(0,4) == "http" || url.substr(0,1) == "/") && url_is_img(url)) {
+            log('preloadimage', url);
+            var img     = new Image();
+            img.src     = url;
+            img.onload  = function(e) {log('preloadimage','loaded', e.target.src)}
+            img.onerror = function(e) {err('preloadimage',e.target.src)}
+            images.push(img);
+        }
+    }
+}
+
+
+
+
+
+/************************************************
+ UTIL FUNCTIONS - GENERIC
+*************************************************/
+function stacktrace() {
+    var f = stacktrace;
+    var stack = '';
+    var i = 0
+    while (f && i < 7) { // at max go 7
+        if (f.name && f.name != 'log' && f.name != 'stacktrace') {
+            stack = '>'+f.name+stack;
+        }
+        i+=1;
+        f = f.caller;
+    }
+    return stack;
+}
+function log(context, string, object) {
+    if (!DEBUG && !i_am_master) return;
+    if (object != undefined)
+        console.log("> "+context+":", string, object);
+    else
+        console.log("> "+context+":", string);
+}
+function err(context, string, object) {
+    console.error('! '+context+" error:", string, object != undefined ? object : '');
+}
+function http_get(url, callback) {
+    var xmlHttp     = new XMLHttpRequest();
+    log('http_get','request',url);
+    xmlHttp.callback = callback;
+    xmlHttp.url = url;
+    xmlHttp.onload  = function (e) {
+        log('http_get','completed',e.target.responseURL);
+        this.callback(this.responseText);
+    }
+    xmlHttp.onerror = function (e) { err('http_get',url,e) }
+    xmlHttp.open( "GET", url, true);
+    xmlHttp.send( null );
+}
+
+/************************************************
+ UTIL FUNCTIONS - SCRIPT SPECIFIC
+*************************************************/
+function url_is_img(url) {
+    ext3 = url.substr(-3).toUpperCase();
+    ext4 = url.substr(-4).toUpperCase();
+    return (ext3 == "PNG" || ext3 == "JPG" || ext3 == "GIF" || ext3 == "BMP" || ext4 == "JPEG");
+}
+var win;
+var is_iOS = navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false;
+//var is_iOS =/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+var popups_allowed = true;
+function set_popup(url, width, height) {
+    if (isNaN(width))  width  = default_popup_width;
+    if (isNaN(height)) height = default_popup_height;
+    if (is_iOS) {
+        log('set_popup','is_iOS set_hidden',url);
+        set_hidden(url);
+    }
+    else if (popups_allowed) {
+        log('set_popup',url);
+        win =  window.open(url, "win", "scrollbars=no, location=no, locationbar=no, menubar=no, width="+width+", height="+height);
+        try {
+            win.focus();
+        }
+        catch (e) {
+            log('set_popup','blocked set_hidden',url);
+            popups_allowed = false;
+            set_hidden(url);
+        }
+    }
+    //win.resizeTo(width,height);
+}
+function close_popup() {
+    if (typeof win == "object" && !is_iOS && popups_allowed)
+        win.close();
+    else
+        close_hidden();
+}
+function set_hidden(url) {
+    frame_hidden.src = url;//.replace('http:','').replace('https:','');
+}
+function close_hidden() {
+    frame_hidden.src = "about:blank";
+}
+
+
+function change_script_position(num) {
+    log('change_script_position', num);
+    window.clearTimeout(conductor_timeout);
+    position = num;
+    conductor();
+}
+var main_audio      = new Audio();
+var audio_can_play  = false;
+main_audio.autoplay = false; // due to ios we cannot have this
+main_audio.loop     = false;
+main_audio.oncanplay = function(e){ audio_can_play = true; };
+// main_audio.onloadstart      = function(e){ console.log(e.type,main_audio.currentTime); };
+// main_audio.onloadeddata     = function(e){ console.log(e.type,main_audio.currentTime); };
+// main_audio.onloadedmetadata = function(e){ console.log(e.type,main_audio.currentTime); };
+// main_audio.onplay           = function(e){ console.log(e.type,main_audio.currentTime); };
+// main_audio.onpause          = function(e){ console.log(e.type,main_audio.currentTime); };
+// main_audio.onplaying        = function(e){ console.log(e.type,main_audio.currentTime); };
+// we notice on iOS when user does not have permissions only loadstart and loadedmetadata fire
+// wheras on desktop play loadstart loadedmetadata loadeddata canplay and playing fire
+// function main_audio_next_slide_cb(){
+//     log('main_audio', 'ended. next slide');
+//     change_script_position(position+1);
+// }
+//main_audio.addEventListener('ended', main_audio_next_slide_cb);
+var play_check_handle = null;
+var play_button       = null;
+function audio_play(url) {
+    // check if play didn't work and request user to interact to start
+    // lame ios security crap
+    if (typeof url == 'undefined' || main_audio.src == url) {
+        log('main_audio', 'restart '+new Date().getTime(), url);
+        main_audio.currentTime = 0;
+        main_audio.play();
+    }
+    else {
+        log('main_audio', 'start '+ url, new Date().getTime());
+        // main_audio.onloadedmetadata = audio_play_ask_user;
+        main_audio.src = url;
+
+        // main_audio.onloadeddata = audio_play_ask_user();//
+        // main_audio.oncanplay = audio_play_ask_user();//
+        //function(e){console.log(e.type,main_audio.currentTime); setTimeout(function(){console.log('1second',main_audio.currentTime);},1000)};
+        main_audio.play();
+    }
+    // get permissions on ios
+    if (!audio_can_play) {
+        audio_play_ask_user();
+    }
+}
+function audio_play_ask_user(){
+    play_check_handle = window.setTimeout(function(){
+      if(audio_can_play) return; // maybe we got permissions through other play
+      if (main_audio.currentTime == 0.0) {
+        if (play_button)
+            return; // already setup
+        log('main_audio', 'could not play');
+        // log(main_audio.src,main_audio.duration,main_audio.currentTime);
+        play_button = document.createElement('button');
+        play_button.id = 'audio_button';
+        play_button.innerText = 'begin';
+        play_button.style.opacity = 1;
+        play_button.onclick = function() {
+            main_audio.play();
+            play_button.parentNode.removeChild(play_button);
+        }
+        document.body.appendChild(play_button);
+        // valign center
+        if (play_button.offsetHeight < window.innerHeight)
+            play_button.style.marginTop = ""+(window.innerHeight - play_button.offsetHeight) / 2;
+        if (play_button.offsetWidth < window.innerWidth)
+            play_button.style.marginLeft = ""+(window.innerWidth - play_button.offsetWidth) / 2;
+
+      }
+  },1000);
+}
+function audio_stop() {
+    // log('audio','stop');
+    main_audio.pause();
+    main_audio.currentTime = 0;
+    window.clearTimeout(play_check_handle);
+}
+
+
+
+
+
+
+
+
+/************************************************
+
+
+
+ CONDUCTOR
+
+
+
+*************************************************/
+var conductor_timeout = null;
+var line = "";
+// elements
+var frame_apple, frame_keepkeyboard, frame_breath, frame_1, frame_hidden, frame_image, image, frame_message, message, controlbox, slide, masterbox;
+function conductor() {
+    if (typeof script == 'undefined' || !script_recieved || !master_state_ready || !loading_seq_complete) {
+        // page not loaded yetmessage
+        log('conductor','waiting for script & master_state');
+        window.setTimeout(conductor, 1000);
+        return;
+    }
+    // Loop Until script is ready, and master_state_ready
+
+    // setup elements
+    // also first time after script and init loaded f/srv
+    if (typeof frame_apple == 'undefined') {
+        frame_apple        = document.getElementById('frame_apple');
+        frame_keepkeyboard = document.getElementById('frame_keepkeyboard');
+        frame_breath       = document.getElementById('frame_breath');
+        frame_1            = document.getElementById('frame_1');
+        frame_hidden       = document.getElementById('frame_hidden');
+        frame_image        = document.getElementById('frame_image');
+        image              = document.getElementById('image');
+        frame_message      = document.getElementById('frame_message');
+        message            = document.getElementById('message');
+        controlbox         = document.getElementById('controlbox');
+        slide              = document.getElementById('slide');
+        masterbox          = document.getElementById('master');
+        breath_button      = document.getElementById('breath_button');
+        // now that script and first state are ready
+        preloadimages(script.slice(position));
+        // turn off loading window
+        if (DEBUG_LOADING) return
+        loading_off();
+    }
+
+    line = script[position];
+    // audio_stop();
+    slide.innerText = line.substr(0,30)+"  ["+(position)+"] ";
+    if (show_slide_prev)
+        slide.innerText= script[position>0?position-1:0].substr(0,20)+"  ["+(position-1)+"]\n"+slide.innerText;
+    if (i_am_master)
+        highlight_step();
+
+    // wait line means loop until someone pushes position forward
+    // push could happen from master_conducter or user interaction
+    if (line == "wait") {
+        // wait for master conductor or user to change something
+        window.clearTimeout(conductor_timeout);
+        conductor_timeout = window.setTimeout(conductor, 100);
+        return;
+    }
+    else {
+        //log('conductor','script['+position+']',script[position]);
+        // seting master_init here appears to cause breathing to skip only when we are master
+        // turned this off, do instead with key:
+        //if (i_am_master) master_emit_init(position);
+    }
+
+    // handle skipping out of breathing when it is active
+    if (breathing_active && line != 'breathing') {
+        console.log('no more breathing', line, position);
+        // BUG BUG HERE
+        frame_breath.style.display = 'none';
+        breathing_active = false;
+    }
+
+
+    if (line.substr(0,2) == "//") {
+        if (line.length>4)
+            log('conductor', 'comment', line);
+        position += 1;
+        conductor();
+    }
+    else if (line == "no_popup") {
+        log('conductor', 'NO_POPUP');
+        close_popup();
+        // if (i_am_master) master_emit_init(position+1);
+        position += 1;
+        conductor();
+    }
+    else if (line == "no_message") {
+        log('conductor', 'NO_MESSAGE');
+        message.innerHTML = "";
+        frame_message.style.display = "none";
+        // if (i_am_master) master_emit_init(position+1);
+        position += 1;
+        conductor();
+    }
+    else if ( ! isNaN( line.replace('ms','') ) ) {
+        log('conductor', 'WAIT', line);
+        // eg. 4000ms means wait for 4000ms before continuing
+        // if (i_am_master) master_emit_init(position+1);
+        conductor_timeout = window.setTimeout(function(){position+=1;conductor()}, parseInt(line.replace('ms','')));
+    }
+    else if (line.substr(0,4) == "http" || line.substr(0,1) == "/") {
+        log('conductor', 'URL', line);
+        // loading url. check desired width of element if into browser or popup
+        // if not popup but url is a image, load into image div we can control width on
+        var popup = false;
+        var interactive = false; // if true the standard url load for non images will be on top, by hiding message box
+        var width = "max";
+        var height = "max";
+        var args = line.split(" ");
+        var url = args[0];
+        if (args.length >= 2)
+            var arg1 = args[1];
+        if (args.length >= 3)
+            var arg2 = args[2];
+        if (args.length >= 4)
+            var arg3 = args[3];
+
+        var isimage = url_is_img(url);
+
+        // get arguments if available
+        if ( typeof arg1 != 'undefined') {
+            if      (arg1.indexOf("popup") >= 0)       popup       = true;
+            else if (arg1.indexOf("interactive") >= 0) interactive = true;
+            else if (arg1.indexOf("width_") >= 0)      width       = arg1.substr(6);
+            else if (arg1.indexOf("height_") >= 0)     height      = arg1.substr(7);
+        }
+        if ( typeof arg2 != 'undefined') {
+            if      (arg2.indexOf("popup") >= 0)       popup       = true;
+            else if (arg2.indexOf("interactive") >= 0) interactive = true;
+            else if (arg2.indexOf("width_") >= 0)      width       = arg2.substr(6);
+            else if (arg2.indexOf("height_") >= 0)     height      = arg2.substr(7);
+        }
+        if ( typeof arg3 != 'undefined') {
+            if      (arg3.indexOf("popup") >= 0)       popup       = true;
+            else if (arg3.indexOf("interactive") >= 0) interactive = true;
+            else if (arg3.indexOf("width_") >= 0)      width       = arg3.substr(6);
+            else if (arg3.indexOf("height_") >= 0)     height      = arg3.substr(7);
+        }
+        if (popup == true) {
+            if (isNaN(width))  width  = default_popup_width;
+            if (isNaN(height)) height = default_popup_height;
+            set_popup(url, width, height);
+        }
+        else if (isimage) {
+            // reset some things
+            image.src = url;
+            image.style.width  = "";
+            image.style.height = "";
+            frame_1.style.display = "none";
+            frame_image.style.display = "block";
+            if (width.length > 0)  image.style.width  = width;
+            if (height.length > 0) image.style.height = height;
+        }
+        else {
+            if (interactive)
+                frame_message.style.display = "none"; // have to remove so we can scroll and click since message is above frame
+            else
+                frame_message.style.display = "block";
+            frame_1.src = url.replace('http:','').replace('https:','');
+            frame_1.style.display = "block";
+            frame_image.style.display = "none";
+        }
+        // if (i_am_master) master_emit_init(position+1);
+        change_script_position(position+1);
+    }
+    else if (line.substr(0,4) == 'goto') {
+        var args = line.split(/\s+/);
+        // handle offsets:
+        if (args[1].substr(0,1) == '-' || args[1].substr(0,1) == '+' )
+            var toslide = position+parseInt(args[1]);
+        else
+            var toslide = parseInt(args[1]);
+
+        if (args.length >= 3)
+            var count = parseInt(args[2]);
+        else
+            var count = 'infite'
+
+
+        // if (i_am_master) master_emit_init(position+1);
+        if (count == 0) {
+            // when counter argument is zero skip
+            log('conductor', 'GOTO skip');
+            change_script_position(position+1);
+        }
+        else if (count == 'infite') {
+            log('conductor', 'GOTO slide '+toslide);
+            change_script_position(toslide);
+        }
+        else {
+            log('conductor', 'GOTO slide '+toslide+' count '+count);
+            count -= 1;
+            // preserve +/- offset for logs
+            script[position] = 'goto '+args[1]+' '+count;
+            change_script_position(toslide);
+        }
+
+    }
+    else if (line == 'breathing') {
+        //if (!breathing_active) {
+        log('conductor', 'BREATHING begin');
+        breath_begin();
+        // advance position only when it's done. This is a like a wait
+        //}
+    }
+    else if (line.substr(0,5) == 'audio') {
+        log('conductor', 'AUDIO', line);
+        var args    = line.split(/\s+/);
+        var urlcmd  = args[1];
+        var doonend = args[2] ? args[2] : 'next';
+        var doarg   = args[3];
+        if (urlcmd == 'stop') {
+            audio_stop();
+        }
+        else {
+            audio_play(urlcmd);
+        }
+
+        if (doonend == 'goto') {
+            if (doarg.charAt(0) == '-' || doarg.charAt(0) == '+' )
+                var toslide = position+parseInt(doarg);
+            else
+                var toslide = parseInt(doarg);
+            main_audio.onended = function(){ change_script_position(toslide); }
+        }
+        else if (doonend == 'next') {
+            main_audio.onended = function(){ change_script_position(position+1); }
+        }
+        else {
+            // effectively a permanent wait
+            main_audio.onended = null;
+        }
+        change_script_position(position+1);
+    }
+    else if (line.substr(0,7) == 'flicker') {
+        if (frame_apple.style.display != 'block') {
+            // we are NOT in hidden mode. do effect
+            var args = line.split(/\s+/);
+            var max = args[1] ? parseInt(args[1]) : 2000;
+            var min = args[2] ? parseInt(args[2]) : max*0.25
+            var do_for = parseInt(Math.random() * (max - min) + min);
+            var now = new Date().getTime();
+            var do_until = now+do_for;
+            log('conductor', 'FLICKER', now+' '+do_for);
+            function flicker_loop() {
+                if (new Date().getTime() < do_until) {
+                    frame_apple.style.display = frame_apple.style.display == 'none' ? 'block' : 'none';
+                    // frame_apple.style.opacity = 0.8;
+                    var step_in = Math.random() * (50/*max*/ - 10 /*min*/) + 10;
+                    setTimeout(function(){
+                        flicker_loop();
+                    }, step_in);
+                }
+                else {
+                    frame_apple.style.display = 'none';
+                    frame_apple.style.opacity = 1;
+                }
+            }
+            flicker_loop();
+        }
+        else {
+            log('conductor', 'FLICKER', 'skip');
+        }
+        change_script_position(position+1);
+    }
+    else if (line.substr(0,5) == 'video') {
+        var args = line.split(/\s+/);
+        var url  = args[1];
+        var ios_gif = args[2];
+        var options = args[3] ? args.slice(3).join(' ') : '';
+        if (is_iOS) {
+            frame_image.innerHTML = '<img id=video src="'+ios_gif+'" '+options+' style="object-fit: cover;">';
+        }
+        else {
+            frame_image.innerHTML = '<video id=video src="'+url+'" '+options+' style="object-fit: cover;">';
+        }
+        frame_image.style.display = "block";
+        change_script_position(position+1);
+    }
+    else if (line.substr(0,10) == 'popup_test') {
+        var args = line.split(/\s+/);
+        var urls = args.splice(1);
+        function popup_test(url) {
+            if (!is_iOS) {
+                window.open(url, "win"+popi, "scrollbars=no, location=no, locationbar=no, menubar=no, width=200, height=300");
+                popi+=1;
+            }
+            console.log('end '+popi);
+        }
+        for (var i = 0; i<urls.length; i++) {
+            popup_test(urls[i]);
+        }
+        change_script_position(position+1);
+
+    }
+    else if (line == 'hide') {
+        controlbox.style.display = 'block';
+        toggle_hide();
+        change_script_position(position+1);
+    }
+    else if (line == 'unhide') {
+        controlbox.style.display = 'none';
+        toggle_hide();
+        change_script_position(position+1);
+    }
+    else {
+        log('conductor', 'MESSAGE', line);
+        // assume its message text (with HTML inside)
+        // first find and remove background information string
+        // var bgcolor = "transparent";
+        var bgcolor = null;
+        var fontcolor = null;
+        var message_str = line;
+        if (m1=message_str.match(/fontcolor_(\S+)/)) {
+            fontcolor = m1[1];
+        }
+        if (m2=message_str.match(/background_(\S+)/)) {
+            bgcolor = m2[1];
+        }
+        message_str = message_str.replace(/fontcolor_\S+/, '').replace(/background_\S+/, '');
+        // if (line.indexOf(" background_") >= 0) {
+        //     bgcolor = line.substr(line.indexOf(" background_")+12);
+        //     message = line.substr(0,line.indexOf(" background_"))
+        // }
+        frame_message.style.display = "block";
+        message.innerHTML = message_str;
+        // if (bgcolor.substr(0,1) == "#")
+        //     frame_message.style.backgroundColor = bgcolor;
+        // else
+        //     frame_message.style.backgroundColor = "transparent";
+        if (bgcolor != null)
+            frame_message.style.backgroundColor = bgcolor;
+        if (fontcolor != null)
+            frame_message.style.color = fontcolor;
+
+        // valign center
+        if (message.offsetHeight < window.innerHeight)
+            message.style.marginTop = ""+(window.innerHeight - message.offsetHeight) / 2;
+        else
+            message.style.marginTop = "";
+
+        // if (i_am_master) master_emit_init(position+1);
+        change_script_position(position+1);
+    }
+}
+var wins_test=[];
+var popi = 0;
+
+
+
+/************************************************
+
+
+
+ FUNCTIONS FOR BREATHING
+
+
+
+*************************************************/
+var breathing_active           = false; // use this to check if we unhide breathing on toggle_hide()
+var breathing_listeners_active = false; // don't setup listeners twice
+var square                     = 200;
+var breath_elem_self           = null;
+var exhale_bg_color            = 'rgb(153, 153, 153)'; // use rgb(n, n, n) notation so compare works
+var inhale_bg_color            = 'rgb(255, 255, 255)';
+function breath_begin() {
+    breath_setup();
+    breath_button.className             = ''; //display = 'none';
+    breath_button.style.display         = 'block';
+    //breath_button.style.transition = 'opacity 1s';
+    breath_button.style.transition      = 'background-color 1s, color 0.5s';
+    breath_button.style.opacity         = 1;
+    breath_button.style.backgroundColor = inhale_bg_color;
+    breath_button.innerText             = 'inhale';
+    frame_breath.style.display          = 'block';
+
+    // prevent next conductor slide on audio end
+    log('breath_begin','main_audio.src=', breath_audio_1_url);
+    main_audio.src =  breath_audio_1_url;
+    socket.emit('get_breath_tempo_bang')
+
+    // when first audio needs to be on tempo, execute this which will restart it:
+
+    breath_button.style.top  = (window.innerHeight/2)-(breath_button.offsetHeight/2);
+    breath_button.style.left = (window.innerWidth/2) -(breath_button.offsetWidth/2);
+
+    breathing_active = true; // used upstream
+}
+function breath_setup () {
+    //This little trick handles master force to breathing sequence
+    if (breathing_listeners_active) return;
+    breathing_listeners_active = true;
+
+    socket.on('breath_tempo_bang', function(){
+        log('breath_tempo_bang', new Date().getTime());
+        audio_play();
+        // on finishing first audio play second
+        // main_audio.onended = function () {
+        //     log('breath_begin','main_audio_src=', breath_audio_2_url);
+        //     main_audio.src = breath_audio_2_url;
+        //     socket.emit('get_breath_tempo_bang');
+        // };
+    });
+
+
+    // Transitions for self
+    breath_button.addEventListener("click", fn = function(e){
+        //e.target.style.opacity = 0.5;
+        log('breath','mouse down');
+        // on first mouse down add elemet
+        if (breath_elem_self == null) {
+            breathing_slaves[socket.id] = 1;
+            breath_elem_self = breath_element_add(socket.id);
+        }
+        breath_elem_self.style.transition = 'opacity 2s';
+        breath_elem_self.style.opacity = 0;
+
+        if (e.target.innerText == 'inhale') {
+            breath_elem_self.style.opacity = 1;
+            socket.emit('breath', socket.id);
+            e.target.style.backgroundColor = exhale_bg_color;
+            e.target.style.color = '#ccc';
+        }
+        else {
+            breath_elem_self.style.opacity = 0.2;
+            e.target.style.backgroundColor = inhale_bg_color;
+            e.target.style.color = '#ccc';
+        }
+
+        if (i_am_master) request_info();
+    }, false);
+    // breath_button.addEventListener("mouseup", fn = function(e){
+    //     e.target.style.opacity = 1;
+    //     breath_elem_self.style.opacity = 0.1;
+    //     log('breath','mouse up');
+    // }, false);
+    breath_button.addEventListener("transitionend", fn = function(e){
+        e.target.innerText = breath_button.innerText == 'inhale' ? 'exhale' : 'inhale';
+        e.target.style.color = '#000';
+        // e.target.innerText = e.target.style.backgroundColor == exhale_bg_color ? 'inhale' : 'exhale';
+    }, true);
+
+
+    // informs this client of a different clients breath
+    socket.on('breathing', function(data) {
+        log('breathing', data);
+        breathing_slaves[data.id] = 1;
+        updateBreathing(data.id);
+    });
+    // sent when this client breaths first time. returns a list of active breathers
+    socket.on('breathing_init', function(data) {
+        log('breathing_init', data);
+        function slowAddNewId(idx) {
+            if (idx >= data.ids.length) return;
+            setTimeout(function(){
+                updateBreathing(data.ids[idx]);
+                slowAddNewId(idx+1);
+            },  Math.random() * (4000/*max*/ - 1000 /*min*/) + 1000 );
+        }
+        if (data.ids.length > 0)
+            slowAddNewId(0);
+    });
+    socket.on('breathing_in_sync', function(data) {
+        log('breathing_in_sync', data);
+        breath_end();
+    });
+    socket.on('breathing_audio_stop', function() {
+        log('breathing_audio_stop');
+        audio_stop();
+    })
+    socket.on('breathing_audio_start', function() {
+        log('breathing_audio_start');
+        audio_play();
+    })
+}
+function breath_end() {
+    breathing_active = false;
+    breath_button.style.opacity = 0;
+    var run_n_times = 4;
+    // if (breath_elem_self)
+    //     breath_elem_self.style.backgroundColor = '#000';
+    // BUGBUG: audio wasn't pausing from setTimeout
+
+
+    function end_sequence(n) {
+        if (n == run_n_times) {
+            //last//end
+            var elem_ids = Object.keys(breathing_slaves);
+            for (var i=0; i<elem_ids.length; i++) {
+                breath_element(document.getElementById(elem_ids[i]))
+            }
+            window.setTimeout(function(){
+                frame_breath.style.backgroundColor = "#000";
+                frame_breath.className += ' flash';
+            },2000);
+            window.setTimeout(function(){
+                frame_breath.className = '';
+                frame_breath.style.display = 'none';
+                frame_breath.style.backgroundColor = "";
+                breath_button.className = '';
+                breath_button.style.display = 'block';
+                audio_stop();
+                position += 1;
+                conductor();
+            },5000);
+        }
+        else {
+            // BUGBUG: non master clients were not setting button opacity
+            breath_button.style.opacity = 0;
+
+            var elem_ids = Object.keys(breathing_slaves);
+            for (var i=0; i<elem_ids.length; i++)
+                breath_element(document.getElementById(elem_ids[i]))
+            window.setTimeout(function(){end_sequence(n+1)}, 3000/*time needs to match animationlength*/);
+        }
+    }
+    // do it
+    end_sequence(1);
+}
+var breath_template       = document.createElement('div');
+breath_template.className = 'breath';
+function breath_element_add(id) {
+    log("breath_element_add",id);
+    var elem          = breath_template.cloneNode();
+    elem.style.width  = square+'px';
+    elem.style.height = square+'px';
+    if (id == socket.id) {// make self different color
+        elem.style.backgroundColor = "rgb(62, 75, 143)"
+        elem.innerText    = 'iYou';
+        elem.style.fontSize = '5vw';
+    }
+    else {
+        elem.innerText    = id;
+    }
+    elem.id           = id;
+    // create elem
+    frame_breath.appendChild(elem);
+    elem.className = 'breath';
+
+    // all elements able to handle fade animationlength
+    elem.addEventListener("animationend", fn = function(e){
+        e.target.className = e.target.className.replace(/\s*flash/g, '');
+    }, false);
+
+
+    // resize until last square close to bottom
+    // var bottom = frame_breath.offsetTop + frame_breath.offsetHeight;
+    var bot = window.innerHeight;
+    var right = window.innerWidth;
+    var elem_bot = elem.offsetTop+elem.offsetHeight;
+    var elem_right = elem.offsetLeft+elem.offsetWidth;
+    if (elem_bot > bot || elem_right > right) {
+        while (square > 0 && elem.offsetTop+elem.offsetHeight > bot || elem.offsetLeft+elem.offsetWidth>right) {
+            square -= 10;
+            for (var i = 0; i < frame_breath.childNodes.length; i++) {
+                if (frame_breath.childNodes[i].nodeName != "DIV")
+                    continue;
+                frame_breath.childNodes[i].style.width = square+'px';
+                frame_breath.childNodes[i].style.height = square+'px';
+            }
+        }
+    }
+    else if (elem_bot < bot-10 || elem_right < right-10) {
+        // elem too small, undeflow
+        /* bugbug: async something or another causes loop to go way off */
+        /* so we make sure square always within reason */
+        while ((square < right+10 || square < bot+10) && elem.offsetTop+elem.offsetHeight < bot-10 && elem.offsetLeft+elem.offsetWidth<right-10) {
+            square += 10;
+            for (var i = 0; i < frame_breath.childNodes.length; i++) {
+                if (frame_breath.childNodes[i].nodeName != "DIV")
+                    continue;
+                frame_breath.childNodes[i].style.width = square+'px';
+                frame_breath.childNodes[i].style.height = square+'px';
+            }
+        }
+    }
+    return elem;
+}
+function updateBreathing(id) {
+    var elem = document.getElementById(id);
+    if (elem) {
+        log("breath have",id);
+    }
+    else { // is new
+        var elem = breath_element_add(id);
+    }
+    breath_element(elem);
+}
+function breath_element(elem) {
+    elem.className += ' flash';
+}
+// Audio
+var breath_audio_2_handle = null;
+var breath_audio_2_startms = null;
+
+
+
+
+
+/************************************************
+ FUNCTIONS FOR MASTER CONTROLS
+*************************************************/
+var activeslideelem;
+function master_controls_toggle() {
+    var e = document.getElementById('master_toggle');
+    var b = document.getElementById('master_controls');
+    if (b.style.display == 'block') {
+        e.innerText     = '+';
+        b.style.display = "none";
+    }
+    else {
+        e.innerText     = "—";
+        b.style.display = "block";
+        if (activeslideelem)
+            window.scrollTo(0,activeslideelem.offsetTop);
+    }
+}
+
+main_audio.src = breath_audio_1_url;
+function goto(num) {
+    // we call goto in first button of script. lets setup audio for ios security crap
+    main_audio.play();
+    main_audio.pause();
+    change_script_position(num);
+}
+
+function force_next() {
+    master_emit_force(position+1); // do before change function since change sets position value
+    change_script_position(position+1);
+}
+function force_prev() {
+    var i = 2;
+    while (position-i > 0 && (script[position-i].substr(0,3)=='no_'))
+        i+=1;
+    master_emit_force(position-i); // do before change function since change sets position value
+    change_script_position(position-i);
+}
+function force_step(num) {
+    master_emit_force(num);
+    change_script_position(num);
+}
+function populate_slidelist() {
+    var slidelist       = document.getElementById('slidelist');
+    for (var i=0; i<script.length; i++) {
+        var row = slidelist.insertRow(-1);
+        var cell = row.insertCell(-1);
+        cell.innerText = (i+1)+" "+script[i].substr(0,60);
+        cell.id = ""+i;
+        cell.onclick = function(event) {
+            var line=i;
+            if (event.shiftKey) {
+                log('set_init', parseInt(this.id));
+                master_emit_init(parseInt(this.id));
+                highlight_init_step();
+            }
+            else if (event.altKey){
+                log('force_step', parseInt(this.id));
+                force_step(parseInt(this.id));
+                highlight_init_step();
+            }
+            else {
+                log('only move self', parseInt(this.id));
+                change_script_position(parseInt(this.id));
+            }
+        }
+    }
+    highlight_step();
+    highlight_init_step();
+}
+function highlight_init_step() {
+    var tds = document.getElementById('slidelist').getElementsByTagName('td');
+    for (var j=0; j<tds.length; j++)
+        tds[j].style.fontWeight='normal';
+    document.getElementById(''+state.slide).style.fontWeight = 'bold';
+}
+var highlight_handle = null;
+function highlight_step() {
+        var slidelist = document.getElementById('slidelist');
+        var cells = slidelist.getElementsByTagName('td');
+        for (var i=0;i<cells.length;i++)
+            cells[i].style.backgroundColor = 'inherit';
+        activeslideelem = document.getElementById(position);
+        activeslideelem.style.backgroundColor="#fcc";
+}
+function master_emit_force(num) {
+    if (!i_am_master) return;
+    state.time  = new Date().getTime();
+    state.slide = num;
+    socket.emit('set_force', {
+        passcode: master_passcode,
+        slide: num
+    });
+}
+function master_emit_init (num) {
+    if (!i_am_master) return;// || !master_record_state) return;
+    // BUGBUG:
+    // hack to be sure we only set init state on breathing
+    state.slide = num;
+    socket.emit('set_state', {
+        passcode: master_passcode,
+        slide: num
+    });
+}
+
+function master_emit_breath_sync () {
+    if (!i_am_master) return;
+    socket.emit('set_breath_sync', {
+        passcode: master_passcode
+    });
+    state.slide += 1;
+}
+function master_emit_breath_audio_stop() {
+    socket.emit('set_breath_audio_stop', {
+        passcode: master_passcode
+    });
+}
+function master_emit_breath_audio_start() {
+    socket.emit('set_breath_audio_start', {
+        passcode: master_passcode
+    });
+}
+function master_reset_state() {
+    // reasoning for now using socket is because master is always setting init
+    // so better to open link and close current manually
+    window.open('/reset/'+master_passcode, "new", "scrollbars=no, location=yes, locationbar=yes, menubar=no, width=100, height=100");
+}
+function master_emit_download_script() {
+    socket.emit('download_script', {
+        passcode: master_passcode
+    });
+}
+function request_info() {
+    socket.emit('get_info');
+}
+function process_info(data) {
+    document.getElementById('clientCount').innerText=data.clientCount;
+    document.getElementById('breathingActive').innerText=data.breathingActive?data.breathingActive:0;
+}
+// var master_record_state = false;
+// function toggle_record_state() {
+//     master_record_state = !master_record_state;
+//     document.getElementById('record_state_button').style.color=master_record_state?'#f00':'#000';
+// }
+
+
+// loading
+var DEBUG_LOADING          = false; // set to true to keep loading screen on for testing
+var loading_handle         = null;
+var loading_garbage_handle = null;
+var loading_is_on          = false;
+var loading_seq_complete   = false;
+var loading_seq_ms         = LIVE ? 10000 : 2000;
+var loading_seq_handle     = null;
+var frame_loading, loading_media;
+function loading_show() {
+    frame_loading.style.display    = 'block';
+    loading_media.style.display    = 'block';
+    frame_loading.style.visibility = 'visible';
+    loading_media.style.visibility = 'visible';
+
+}
+function loading_hide() {
+    frame_loading.style.visibility = 'hidden';
+    loading_media.style.visibility = 'hidden';
+}
+function loading_on() {
+    if (loading_is_on) return;
+    loading_is_on  = true;
+    log('loading', 'on');
+
+    loading_seq_handle = window.setTimeout(function(){
+        loading_seq_complete=true}, loading_seq_ms);
+
+    frame_loading  = document.getElementById('frame_loading');
+    loading_media  = document.getElementById('loading_media');
+
+    frame_loading.innerText = ''
+    // transmediale
+    if (device_id && start_at && end_at)
+        loading_media.innerText = 'PLUG IN'
+    loading_show();
+
+    frame_loading.addEventListener("transitionend", loading_loop);
+    frame_loading.style.transition = 'opacity 2s';
+    loading_media.style.transition = 'opacity 2s';
+    // javascript sucks this much:
+    loading_handle = window.setTimeout(function(){
+        frame_loading.style.opacity = 0.5;
+        loading_media.style.left = ""+(window.innerWidth - loading_media.offsetWidth) / 2;
+        loading_media.style.top = ""+(window.innerHeight - loading_media.offsetHeight) / 2;
+        loading_media.style.opacity = 1;
+    }, 1000);
+    var i =0
+    loading_garbage_handle = window.setInterval(function(){
+        if (script) {
+            frame_loading.innerText = script[i]+frame_loading.innerText;
+            i++;
+            if (i>script.length)
+                i=0;
+            if (frame_loading.innerText.length > 10000)
+                frame_loading.innerText = frame_loading.innerText.substr(0,2000);
+        }
+    }, 100);
+
+}
+function loading_off() {
+    log('loading','off');
+    loading_is_on = false;
+    frame_loading.style.display    = 'none';
+    loading_media.style.display    = 'none';
+    frame_apple.style.display ='none';
+    frame_loading.removeEventListener('transitionend', loading_loop);
+    window.clearInterval(loading_garbage_handle);
+}
+function loading_loop(e) {
+    var curopacity = parseFloat(frame_loading.style.opacity||0);
+
+    if (curopacity > 0.1) {
+        frame_loading.style.opacity = 0;
+        loading_media.style.opacity = 1;
+    }
+    else {
+        frame_loading.style.opacity = 0.5;
+        loading_media.style.opacity = 0;
+    }
+
+}
+</script>
+
+
+<style>
+body {
+    font-family:      sans-serif;
+    margin:           0;
+    padding:          0;
+    background-color: #fff;
+}
+#controlbox {
+    position:         absolute;
+    right:            20; top: 10;
+    background-color: rgba(222,222,222,0.8);
+    font-size:        14pt;
+    padding:          10;
+    text-align:       right;
+    font-family: monospace;
+
+}
+#controlbox #master,
+#controlbox #master_controls {
+    display: none;
+}
+#breathingActive, #clientCount {
+    font-size:        14pt;
+}
+#controlbox #slide {
+    /*background-color: #ccc;*/
+    color:            #999;
+    width:            70%;
+    font-size:        0.6em;
+}
+#controlbox #master #slidelistbox {
+    border:     1px solid black;
+    height:     70%;
+    width:      300px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#controlbox #master #slidelistbox td {
+    font-size:   0.8em;
+    line-height: 0.8em;
+    font-family: monospace;
+}
+#frame_message {
+    position:      fixed;
+    width:         100%;
+    height:        100%;
+    font-size:     4em;
+    /*padding-left:  0.2em;
+    padding-right: 0.2em;*/
+    font-family:   monospace;
+    margin:        0 auto;
+    text-align:    center;
+}
+#frame_message button {
+    font-size:     1em;
+    font-family: monospace;
+    padding: 10px;
+}
+#frame_image {
+    position: fixed;
+    width:    100%;
+    height:   100%;
+    padding:  0; margin:0;
+    top:      0; left:0;
+}
+#frame_1,
+#frame_apple {
+    width:    100%;
+    margin:   0;
+    padding:  0;
+    height:   100%;
+    position: fixed;
+    top:      0;
+    left:     0;
+}
+#frame_hidden {
+    /*visibility: hidden;*/
+    display: none;
+}
+#frame_keepkeyboard {
+    display:  none;
+    position: fixed;
+    width:    100%;
+    height:   100%;
+    top:      0; left:0;
+}
+#frame_breath {
+    width:            100%;
+    height:           100%;
+    font-size:        0.6em;
+    display:          none;
+    background-color: #eee; /*debug*/
+    position:         fixed;
+    top:              0;
+    left:             0;
+}
+#audio_button,
+#breath_button {
+    position:    absolute;
+    font-size:   6em;
+    padding: 1em;
+    _left:       33%;
+    _top:        44%;
+    opacity:     0;
+    font-family: monospace;
+    box-shadow: none;
+border-radius: 0;
+text-shadow: -4px 4px #ccc;
+box-shadow: inset 0 0 0 4px #669;
+/*border: none;*/
+border-radius: 8px;
+}
+.breath {
+    background-color: #eee;
+    background-color: #333;
+    color:            #eee;
+    overflow:         hidden;
+    text-align:       center;
+    display:          inline-block;
+    opacity:          0.1;
+    font-family:      monospace; font-size: 1.8em;
+    /*border: 1px solid #000;*/
+    /*
+    align-items: center;
+    display: flex;*/
+}
+.flash{
+    /*animation: flash 2.4s ease-out normal;*/
+    animation:                 flash 3.5s steps(32) normal;
+    animation-iteration-count: 1;
+}
+/*@keyframes flash {
+    0% { background-color:none;}
+    65% { background-color:#666;}
+    100% {background-color:none;}
+}*/
+@keyframes flash {
+    0% { opacity: 0.1;}
+    65% { opacity: 1.0;}
+    100% { opacity: 0.1;}
+}
+
+#frame_loading {
+    position:         fixed;
+    width:            100%;
+    height:           100%;
+    padding-left:     0.2em;
+    padding-right:    0.2em;
+    display:          none;
+    background-color: #336;
+    opacity:          0;
+    overflow-y:       hidden;
+    color:            #f99;
+}
+#loading_media {
+    font-size: 4em;
+    position: fixed;
+    opacity: 0;
+    color: #333;
+}
+.small {
+    font-size: 0.5em;
+}
+/* levels and who is on top: */
+#controlbox         { z-index: 9997; }
+#frame_keepkeyboard { z-index: 9998; } /*keeps control of keyboard away from frame_apple*/
+#loading_media      { z-index: 9996; }
+#frame_loading      { z-index: 9995; }
+#frame_apple        { z-index: 8000; }
+#audio_button       { z-index: 300; }
+#frame_breath,
+#breath_button      { z-index: 200; }
+#frame_message      { z-index: 100; }
+#frame_image        { z-index: 50; }
+#frame_1            { z-index: 10; }
+#frame_hidden       { z-index: 0; } /* this is instead of popups */
+</style>
+
+<div id=controlbox>
+    <div style="font-size:10pt; padding-top:5px;">press space to hide/unhide</div>
+    <!-- <span id=slide></span> -->
+    <div id=master>
+        <span id=slide></span>
+        <a onclick="request_info()"><span id=clientCount>0</span>|<span id=breathingActive>0</span></a>
+        <span id=master_toggle onclick="master_controls_toggle()">+</span>
+        <div id=master_controls>
+
+            <button onclick="force_prev()">&lt;</button> <button onclick="force_next()">&gt;</button>
+            <!-- <a id=record_state_button onclick="toggle_record_state()">r</a><br> -->
+            <button onclick="master_emit_breath_sync()">breath end</button> <a onclick="master_emit_breath_audio_stop()">&#9209;</a> <a onclick="master_emit_breath_audio_start()">&#9654;</a>
+            <br>
+            <a class=small onclick="master_reset_state()">[reset state]</a> <a class=small onclick="master_emit_download_script()">[load script]</a><br><br>
+
+            <div id="slidelistbox">
+                <table width=1000>
+                    <tbody id='slidelist'>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div id=frame_keepkeyboard>.</div>
+
+<div id=loading_media>LOADING</div>
+<div id=frame_loading>
+</div>
+
+<iframe
+id="frame_apple"
+style="display: block"
+data-progress="0"
+width="1920"
+frameborder="0"
+webkitallowfullscreen
+mozallowfullscreen
+allowfullscreen
+src="about:blank">&nbsp;</iframe><!-- http://apple.com -->
+
+<div id=frame_breath>
+    <button id=breath_button>inhale</button>
+</div>
+
+<div id=frame_message><div id=message></div></div>
+<div id=frame_image><center><img id="image" src="/client/333333-0.png"></center></div>
+
+<iframe
+id="frame_1"
+data-progress="0"
+width="1920"
+frameborder="0"
+webkitallowfullscreen
+mozallowfullscreen
+allowfullscreen
+src="about:blank">&nbsp;</iframe>
+
+<iframe
+id="frame_hidden"
+data-progress="0"
+width="300" height=300
+frameborder="0"
+src="about:blank">&nbsp;</iframe>
+
+</body>
+</html>
