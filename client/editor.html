@@ -1,5 +1,9 @@
 <html>
 <head>
+    <script src="/client/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="/client/lib/codemirror.css">
+    <script src="/client/lib/simple.js"></script>
+    <script src="/client/lib/surrogate-witch.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <style>
     body {
@@ -7,18 +11,33 @@
         color: #666;
         background-color: #e0ffe0;
     }
+    .CodeMirror { 
+        width: 600px;
+        height: auto; /* auto causes editor to extend to end of content */
+    }
     </style>
 </head>
 <body>
     <script>
-
+window.onload = function() {
+    var textarea = document.getElementsByTagName('textarea')[0];
+var myCodeMirror = CodeMirror.fromTextArea(
+        textarea, 
+        {
+            mode:'surrogate-witch',
+            lineNumbers: true,
+            firstLineNumber: 0,
+            lineWrapping: true
+        }
+    );
+}
     </script>
 <table>
     <td valign=top>
         Edit script:<br>
 <form id=scriptedit action=submitscript  method=post>
 <input type=submit value="submit"><br>
-<textarea name=script cols=88 rows=35 style='background-color: #ffffe0; color: #000'>
+<textarea name=script cols=88 rows=35 style='width:600px; background-color: #ffffe0; color: #000'>
 !!SCRIPT!!
 </textarea>
 <br><input type=submit value="submit">
