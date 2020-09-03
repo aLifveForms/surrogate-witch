@@ -21,7 +21,7 @@
     <script>
 window.onload = function() {
     var textarea = document.getElementsByTagName('textarea')[0];
-var myCodeMirror = CodeMirror.fromTextArea(
+    var myCodeMirror = CodeMirror.fromTextArea(
         textarea, 
         {
             mode:'surrogate-witch',
@@ -30,7 +30,77 @@ var myCodeMirror = CodeMirror.fromTextArea(
             lineWrapping: true
         }
     );
+    hyperlinkOverlay(myCodeMirror);
 }
+    </script>
+<script>    
+    // https://stackoverflow.com/questions/31721490/place-hyperlinks-in-codemirror-textarea
+    function hoverWidgetOnOverlay(cm, overlayClass, widget) {
+        cm.addWidget({line:0, ch:0}, widget, true);
+        widget.style.position = 'fixed';
+        widget.style.zIndex=100000;
+        widget.style.top=widget.style.left='-1000px'; // hide it 
+        widget.dataset.token=null;
+    
+        cm.getWrapperElement().addEventListener('mousemove', e => {
+            let onToken=e.target.classList.contains("cm-"+overlayClass), onWidget=(e.target===widget || widget.contains(e.target));
+    
+            if (onToken && e.target.innerText!==widget.dataset.token) { // entered token, show widget
+                var rect = e.target.getBoundingClientRect();
+                widget.style.left=rect.left+'px';
+                widget.style.top=rect.bottom+'px';    
+                widget.dataset.token=e.target.innerText;
+                if (typeof widget.onShown==='function') widget.onShown();
+    
+            } else if ((e.target===widget || widget.contains(e.target))) { // entered widget, call widget.onEntered
+                if (widget.dataset.entered==='true' && typeof widget.onEntered==='function')  widget.onEntered();
+                widget.dataset.entered='true';
+    
+            } else if (!onToken && widget.style.left!=='-1000px') { // we stepped outside
+                widget.style.top=widget.style.left='-1000px'; // hide it 
+                delete widget.dataset.token;
+                widget.dataset.entered='false';
+                if (typeof widget.onHidden==='function') widget.onHidden();
+            }
+    
+            return true;
+        });
+    }
+    function hyperlinkOverlay(cm) {
+        if (!cm) return;
+    
+        const rx_word = "\" "; // Define what separates a word
+    
+        cm.addOverlay({
+            token: function(stream) {
+                let ch = stream.peek();
+                let word = "";
+                if (rx_word.includes(ch) || ch==='\uE000' || ch==='\uE001') {
+                    stream.next();
+                    return null;
+                }
+                while ((ch = stream.peek()) && !rx_word.includes(ch)) {
+                    word += ch;
+                    stream.next();
+                }    
+            }}, 
+            { opaque : true }  // opaque will remove any spelling overlay etc
+        );
+    
+        let widget=document.createElement('button');
+        widget.innerHTML='&rarr;'
+        widget.onclick=function(e) { 
+            if (!widget.dataset.token) 
+                return;
+            let link=widget.dataset.token;
+            if (!(new RegExp('^(?:(?:https?|http?|ftp):\/\/)', 'i')).test(link)) 
+                link="\/\/l.ptxx.cc"+link;
+            window.open(link, '_blank'); 
+            return false;
+        };
+        hoverWidgetOnOverlay(cm, 'link', widget);
+    }
+    
     </script>
 <table>
     <td valign=top>
