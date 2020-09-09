@@ -32,6 +32,7 @@ on top.
 var LIVE = false;
 var TRANSMEDIALE = true;
 var PRAHA = true;
+var MULTISCRIPT = true; // allows editor to choose which script file is master atm
 
 var BREATH_BUTTON_HIDE = true;
 // BUGBUG: transparent bacgkround should show hide site
@@ -45,6 +46,8 @@ if (TRANSMEDIALE)
     script_url           = "/client/script_transmediale.txt";
 if (PRAHA)
     script_url           = "/client/script_praha.txt";
+if (MULTISCRIPT)
+    script_url           = "/client/script_current.txt";
 
 //var control_server       = "http://localhost:8080"; // for this server
 //var control_server       = "http://transformellae.cloudno.de"

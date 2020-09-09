@@ -1,1 +1,1 @@
-scripts/test2.txt
+scripts/test1.txt
