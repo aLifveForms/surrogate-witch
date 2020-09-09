@@ -1,5 +1,10 @@
 <html>
 <head>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+
+
+    
+
     <script src="/client/lib/codemirror.js"></script>
     <link rel="stylesheet" href="/client/lib/codemirror.css">
     <script src="/client/lib/simple.js"></script>
@@ -11,10 +16,30 @@
         color: #666;
         background-color: #e0ffe0;
     }
+    input[name="filename"] {
+      background: inherit;
+      border: solid #aaaaaa33 1px;
+      color: #aaa;
+      font-style: italic;
+      padding-left: 0.2em;
+      width: 80%;
+    }
+    /* input[type="submit"] {
+        font-family: inherit;
+    font-size: 100%;
+    padding: .5em 1em;
+    color: rgba(0,0,0,.8);
+    border: none transparent;
+    background-color: #e6e6e6;
+    text-decoration: none;
+    border-radius: 2px;
+    } */
+
     .CodeMirror { 
         width: 600px;
         height: auto; /* auto causes editor to extend to end of content */
     }
+    .CodeMirror .cm-link { text-decoration: none;}
     </style>
 </head>
 <body>
@@ -27,11 +52,41 @@ window.onload = function() {
             mode:'surrogate-witch',
             lineNumbers: true,
             firstLineNumber: 0,
-            lineWrapping: true
+            lineWrapping: true,
+            // https://github.com/codemirror/CodeMirror/issues/381
+            // onChange: function(){myCodeMirror.save()},
+            // onCursorActivity: function() {
+            //     myCodeMirror.setLineClass(hlLine, null);
+            //     hlLine = editor.setLineClass(myCodeMirror.getCursor().line, "activeline");
+            // }
         }
     );
     hyperlinkOverlay(myCodeMirror);
+    // if cached passcode saved before then set
+    if (localStorage.hasOwnProperty('passcode'))
+        passcodeChange(localStorage.passcode)
+
+    makeSaveButtonFloat()
 }
+
+function parse_hash() {
+    var hash = window.location.hash.substr(1);
+    if (!hash) return;
+    if (hash.substr(0,4) == 'http') {
+        log('onhashchange', 'new script', hash);
+        http_get(hash, parse_script)
+    }
+    else if (hash.substr(0,6) == "master") {
+        master_passcode = hash.substr(6);
+        i_am_master     = true;
+        log('onhashchange', 'i am master', master_passcode);
+        setup_master_control();
+        if (script && script.length > 0)
+            populate_slidelist();
+    }
+}
+
+
     </script>
 <script>    
     // https://stackoverflow.com/questions/31721490/place-hyperlinks-in-codemirror-textarea
@@ -100,33 +155,77 @@ window.onload = function() {
         };
         hoverWidgetOnOverlay(cm, 'link', widget);
     }
-    
+    function passcodeChange(newPasscode) {
+        var elem = document.getElementById('passcodeinput')
+        if (typeof newPasscode === 'string')
+            elem.value = newPasscode
+        console.log('passcodeChange',elem.value)
+        Object.values(document.getElementsByClassName('passcode'))
+              .forEach(function(input) {input.value=elem.value})
+        localStorage.passcode = elem.value;
+    }
+    function saveAs() {
+        var files = document.querySelectorAll('select[name=files]')[0]
+        var filename = prompt ("Save as filename:",files.options[files.selectedIndex].value.replace('/client/files/',''))
+        if (filename === null)
+            return false;
+        document.getElementById("saveas_filename").value = filename
+        document.getElementById("scriptedit").submit()
+    }
+    function makeSaveButtonFloat() {
+        var btn = document.getElementById('scripteditsave')
+        // var top = btn.offsetTop+2
+        // var left = btn.offsetLeft+2
+        var rect = btn.getBoundingClientRect()
+        var top = rect.y
+        var left = rect.x
+        btn.style.position='fixed'
+        btn.style.left=left;
+        btn.style.top=top;
+    }
+    function openScript() { 
+        var files = document.querySelectorAll('select[name=files]')[0]
+        var filename = files.options[files.selectedIndex].value.replace('/client/scripts/','')
+        window.location = '/editor/'+filename
+    }
     </script>
 <table>
     <td valign=top>
-        Edit script:<br>
-<form id=scriptedit action=submitscript  method=post>
-<input type=submit value="submit"><br>
-<textarea name=script cols=88 rows=35 style='width:600px; background-color: #ffffe0; color: #000'>
-!!SCRIPT!!
-</textarea>
-<br><input type=submit value="submit">
-</form>
+        <form id=scriptedit action=/submitscript  method=post>
+        <input type=hidden class=passcode name=passcode>
+        <input type=hidden id=saveas_filename name=saveas_filename>
+        <table><td>Edit script:</td><td>
+        !!SCRIPTLISTHTML!!
+        <br><input type=button name=open value="open" onclick=openScript()> 
+        <input type=submit name=makedefault value="make default"> 
+        <input type=button name=saveas value="save as new" onclick=saveAs()>
+        <input type=submit id=scripteditsave name=save value="save"> 
+    </td></table>
+
+        <br><br>
+        <textarea name=script cols=88 rows=35 style='width:600px; background-color: #ffffe0; color: #000'>!!SCRIPT!!</textarea><br>
+        </form>
     </td>
     <td>&nbsp;&nbsp;&nbsp;</td>
     <td valign=top>
 
-Upload files:<br>
+        Password: <input type=password id=passcodeinput onchange="passcodeChange()"><br><br>
+        
+        Upload files:<br>
 <form id="uploadForm"
     enctype="multipart/form-data"
     action="/upload"
     method="post">
-1. <input type="file" name="files" value="select" multiple /><br>
-2. <input type="submit" value="Upload Files" name="submit"><br>
+<input type=hidden class=passcode name=passcode>
+
+1. <input  type="file" name="files" value="select" multiple /><br>
+2. <input  type="submit" value="Upload Files" name="submit"><br>
 </form>
-<br>
+Explore files: <a href="/client/files" target=_new>/client/files</a><br><br>
 Delete files:<br>
 <form id=delete_files method=post action="/delete">
+<input type=hidden class=passcode name=passcode>
+<input type="submit" value="Delete" /><br>
 !!FILELISTHTML!!
 <br><input type="submit" value="Delete"/>
 </form>

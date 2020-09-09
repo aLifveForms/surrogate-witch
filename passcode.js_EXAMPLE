@@ -1,0 +1,2 @@
+// define password required for master control and editing
+module.exports = "CHANGEME";

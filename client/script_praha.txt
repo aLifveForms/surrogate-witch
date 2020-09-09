@@ -2,7 +2,7 @@
 //[protektorama domesticae] 
 //[5.4.9] Zuerich 27.3.19
 video stop
-Hi
+Hi https://google.com
 wait
 Hi
 wait
@@ -682,6 +682,17 @@ wait
 //IMAGE 
 /client/files/Slide403.jpg width_100% height_100%
 wait
+
+
+
+
+
+
+
+
+
+
+
 
 
 

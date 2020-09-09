@@ -1,31 +1,38 @@
 var LIVE = false;
 var TRANSMEDIALE = true;
 var PRAHA = true; // also enable TRANSMEDIALE since this a revision of that
+var MULTISCRIPT = true; // allows editor to choose which script file is master atm
 
 // TODO: test sockets with a bunch of clients
 //       optimize? http://buildnewgames.com/optimizing-websockets-bandwidth/
 var DEBUG = !LIVE;
 var DEBUG_BREATH_AUDIO = false;
-var passcode = "aaa"; //"AusADUTNAOW" : "aaa"; // poor mans passcode
-//var passcode = "AusADUTNAOW";// : "aaa"; // poor mans passcode
+var passcode = require('./passcode.js'); 
+//"AusADUTNAOW" : "testing"; // poor mans passcode
+//var passcode = "AusADUTNAOW";// : "testin"; // poor mans passcode
 
 // BUGBUG: self sync not working exactly as expected. something to do with client thresholds
 var breathing_self_sync  = true; // when false breath sequence end only when master says so
 
+var fs = require('fs');
+
 var script_download_url = "https://pad.riseup.net/p/fanboy/export/txt";
-var script_file = './client/script_applestore.txt'
+var script_file         = './client/script_applestore.txt'
 if (TRANSMEDIALE)
     script_file = './client/script_transmediale.txt'
 if (PRAHA)
     script_file = './client/script_praha.txt' // PRAHA versoin
-
-var express = require('express');
-var app     = express();
-var server  = require('http').createServer(app);
-var io      = require('socket.io').listen(server);
-var util    = require('util');
-var fs      = require('fs');
-var path    = require('path');
+if (MULTISCRIPT) {
+    script_file = 'client/script_current.txt'
+    script_file_target = 'client/'+fs.readlinkSync(script_file);
+}
+var express     = require('express');
+var serve_index = require('serve-index');
+var app         = express();
+var server      = require('http').createServer(app);
+var io          = require('socket.io').listen(server);
+var util        = require('util');
+var path        = require('path');
 
 var app_port = process.env.app_port || 8080;
 var app_host = process.env.app_host || '0.0.0.0';
@@ -88,6 +95,8 @@ app.get('/reset/'+passcode, function (req, res) {
     breathing_completed = false;
 });
 app.use('/client', express.static(__dirname + '/client'));
+app.use('/client/files', serve_index(__dirname + '/client/files'));
+app.use('/client/scripts', serve_index(__dirname+'/client/scripts'));
 
 
 
@@ -105,23 +114,64 @@ var walkSync = function(dir, filelist) {
   });
   return filelist;
 };
-app.get('/editor', function (req, res) {
-    var data = fs.readFileSync(__dirname + '/client/editor.html');
-    var script = fs.readFileSync(__dirname +'/'+ script_file);
-    if(data) {
-        var filelisthtml = walkSync(__dirname+ '/client/files')
-        console.log('filelisthtml',filelisthtml)
-        // filelisthtml.forEach(function(v,i,r){
-        //     r[i] = '<option value="'+v+'">'+ r[i].replace('client/files/','')+'</option>'
-        // }  )
+app.get(['/editor','/editor/:script_file'], function (req, res) {
+    console.log('editor get params',req.params);
+    var media    = walkSync(__dirname+ '/client/files').map(f=>'/client/files/'+f);
+    var scripts  = walkSync(__dirname +'/client/scripts').map(f=>'/client/scripts/'+f);
+    var allfiles = media.concat(scripts);
+
+    var script = "";
+    var selected_script = ""
+    if (req.params.hasOwnProperty('script_file') && req.params.script_file) {
+        var param_script_path = '/client/scripts/'+req.params.script_file
+        if (scripts.indexOf(param_script_path)<0) {
+            res.send("invalid script file chosen: "+param_script_path)
+            return;
+        }
+        else {
+            script = fs.readFileSync(__dirname + param_script_path);
+            selected_script = param_script_path;
+        }
+    }
+    else {
+        // no specific script selected so we are using the global
+        // default symlink file
+        script = fs.readFileSync(__dirname +'/'+ script_file);//global link
+        selected_script = '/'+script_file_target;
+    }
+
+    var uihtml = fs.readFileSync(__dirname + '/client/editor.html');
+    if(uihtml) {
+
+        // ui allows deletion of media files and scripts
+        var filelisthtml = allfiles;
         filelisthtml.forEach(function(v,i,r){
-            r[i] = '<option value="'+v+'">/client/files/'+ v+'</option>'
+            r[i] = '<option value="'+v+'">'+ v+'</option>'
         }  )
         filelisthtml = '<select name=files size='+(filelisthtml.length+1)+' multiple><option value="" selected>&nbsp;</option>'+filelisthtml+'</select>';
 
-        res.send(data.toString().replace('!!FILELISTHTML!!',filelisthtml).replace('!!SCRIPT!!',script.toString().replace(/&/g,'&amp;')));
+        var scriptlisthtml = scripts;
+        scriptlisthtml.forEach(function(v,i,r){
+            var isdefault = "";
+            var isselected  = "";
+            if (v === '/'+script_file_target) 
+                var isdefault = " (default)";
+            if (v === selected_script) 
+                var isselected = " selected";
+            r[i] = '<option value="'+v+'"'+isselected+'>'+v+isdefault+'</option>'
+        }  )
+        scriptlisthtml = '<select name=files size=1><option value="" selected>&nbsp;</option>'+scriptlisthtml+'</select>';
+
+        res.send(
+            // template:
+            uihtml.toString()
+                .replace('!!FILELISTHTML!!',filelisthtml)
+                .replace('!!SCRIPT!!',script.toString().replace(/&/g,'&amp;'))
+                .replace('!!SCRIPTLISTHTML!!',scriptlisthtml)
+            );
     }
 });
+
 var multer = require('multer');
 var bodyParser = require('body-parser');
 // Add this line below
@@ -132,15 +182,15 @@ var storage =   multer.diskStorage({
    callback(null, './client/files');
  },
  filename: function (req, file, callback) {
-    console.log('storage>filename:', file.originalname);
-    callback(null, file.originalname);
+    var filename = path.basename(path.resolve(file.originalname))
+    console.log('storage>filename:', filename);
+    callback(null, filename);
  }
 });
 var upload = multer({ storage : storage }).array('files',2);
 app.post('/upload',function(req,res){
+    console.log('/upload',req.file)
     upload(req,res,function(err) {
-        //console.log(req.body);
-        //console.log(req.files);
         if(err) {
             return res.end("Error uploading file.");
         }
@@ -148,21 +198,59 @@ app.post('/upload',function(req,res){
     });
 });
 app.post('/submitscript',function(req,res){
-    console.log(req.script)
-    fs.writeFile(__dirname +'/'+ script_file, req.body.script, function(err) {
-        if(err) {
-            return console.log(err);
-            return res.end("Error editing scrit.");
+    console.log('/submitscript post body params',req.body)
+    if (!isPasscodeValid(req.body.passcode))
+        return res.send('invalid password');
+
+    // Endpoint used for saving new name file
+    // changing default also
+    if (req.body.makedefault && req.body.makedefault.length>0) {
+        // just change a script to be default and redirect there
+        var filename = path.basename(path.resolve(req.body.files))
+        var target = 'scripts/'+filename;
+        var link = __dirname +'/client/script_current.txt';
+
+        if (fs.existsSync('client/'+target)) {
+            fs.unlinkSync(link)
+            fs.symlink(target, link, 'file', (err) => { 
+                if (err) {
+                    console.log(err); 
+                    return res.send('error1');
+                }
+                else { 
+                    console.log("\nSymlink created. Update script_file_target global\n"); 
+                    // update global default reference so editor html loader knows:
+                    script_file_target = 'client/scripts/'+filename;
+                    return res.redirect('/editor/'+filename);
+                } 
+            }) 
         }
-        console.log("The script of length '"+req.body.script.length+"' was saved!");
-        // res.end("The script of length '"+req.body.script.length+"' was saved!");
-        res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-        res.redirect('back');
+        else {
+            return res.send('error2');
+        }
+        return 
+    }
+
+    console.log("The script of length '"+req.body.script.length+"' was saved!");
+    if (req.body.saveas_filename && req.body.saveas_filename.length > 0)
+        var filename = path.basename(path.resolve(req.body.saveas_filename))
+    else 
+        var filename = path.basename(path.resolve(req.body.files))
+    fs.writeFile(__dirname +'/client/scripts/'+ filename, req.body.script, function(err) {
+        if(err) {
+            console.log(err);
+            return res.end("Error editing script.");
+        }
+        return res.redirect('/editor/'+filename);
     });
 
 });
+
 app.post('/delete',function(req,res){
     console.log('delete files:',req.body.files, typeof req.body.files);
+    if (!isPasscodeValid(req.body.passcode))
+        return res.send('invalid password');
+
     // one file selected:
     var files = []
     if (typeof req.body.files == "string") {
@@ -171,15 +259,29 @@ app.post('/delete',function(req,res){
     else {
         files = req.body.files;
     }
-    files.forEach(function(file){
-        fs.unlink(__dirname + "/client/files/" + file, function(err) {
-                if (err) {
-                    console.log('err delete file:', file, err);
-                    return res.end("Error deleting file.");
-                } else {
-                    console.log('deleted file:', file);
-                }
-        });
+    // limit files we will allow to be deleted to:
+    // This is likely not secure enough
+    var media = walkSync(__dirname+ '/client/files').map(f=>'/client/files/'+f);
+    var scripts = walkSync(__dirname +'/client/scripts').map(f=>'/client/scripts/'+f);
+    var allowed = media.concat(scripts);
+
+    
+    files.forEach(function(filestr){
+        // use path.resolve() to prevent '../' security issues
+        var file = path.resolve(filestr)
+        if (allowed.indexOf(file) >= 0) {
+            fs.unlink(__dirname + file, function(err) {
+                    if (err) {
+                        console.log('err delete file:', file, err);
+                        return res.end("Error deleting file.");
+                    } else {
+                        console.log('deleted file:', file);
+                    }        
+            });
+        }
+        else {
+            console.error('delete error. file not allowed:',file)
+        }
     })
     res.redirect('back');
 });
