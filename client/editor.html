@@ -182,6 +182,8 @@ function parse_hash() {
         btn.style.position='fixed'
         btn.style.left=left;
         btn.style.top=top;
+        btn.style.zIndex=100000;
+
     }
     function openScript() { 
         var files = document.querySelectorAll('select[name=files]')[0]
@@ -202,7 +204,7 @@ function parse_hash() {
         <input type=submit id=scripteditsave name=save value="save"> 
     </td></table>
 
-        <br><br>
+        <br>
         <textarea name=script cols=88 rows=35 style='width:600px; background-color: #ffffe0; color: #000'>!!SCRIPT!!</textarea><br>
         </form>
     </td>

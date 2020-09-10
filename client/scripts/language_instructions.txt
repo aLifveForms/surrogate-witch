@@ -1,0 +1,91 @@
+// Help on script language and commands
+
+// Wait here until master commands us to go elsewhere
+wait
+// 
+flicker
+
+//
+// AUDIO
+//
+
+// Play audio file
+audio /client/files/snippet.mp3 
+wait
+// Play audio file and when playing is finished skip past wait
+audio /client/files/snippet.mp3 next
+wait
+// Play audio file and when playing is finished go to line #
+audio /client/files/snippet.mp3 goto 20
+wait
+
+
+//
+// WEBSITE LAYER
+//
+
+// Show a website, in this example a file index
+// user will not be able to interactive (only see it)
+http://l.ptxx.cc/files/
+wait
+// same but allow user to navigate site
+http://l.ptxx.cc/files/ interactive
+wait
+// Turn off website layer:
+no_interactive
+wait
+
+//
+// MESSAGE LAYER
+//
+
+// Show message, wait 2 seconds, show next message
+Hi
+2000ms
+hello?
+wait
+// turn off message layer
+no_message
+
+//
+// IMAGE LAYER
+//
+
+// Show image and make full width and height
+// also turn off message layer that would hide image layer
+no_message
+/client/files/Slide002.jpg width_100% height_100%
+wait
+// show in seperate window or popup
+/client/files/Slide002.jpg popup
+wait
+no_popup
+wait
+
+// 
+// VIDEO LAYER
+//
+
+// Play video
+video /client/Gallium_on_an_iPhone6_2000k_1024x.mp4 
+// Play video with backup gif for iOS phones
+video /client/Gallium_on_an_iPhone6_2000k_1024x.mp4 /client/Gallium_on_an_iPhone6_10_480_pal.gif
+// Play video and loop, mute and set height/width 
+video /client/Gallium_on_an_iPhone6_2000k_1024x.mp4 loop autoplay muted webkit-playsinline width=100% height=100%
+
+
+//
+// todo: will document these layer
+no_popup
+wait
+goto +1
+wait
+goto 0
+wait
+// do this 10 times:
+goto -1 10
+wait
+breathing
+flicker 5000ms
+// hide witch (show apple layer)
+hide
