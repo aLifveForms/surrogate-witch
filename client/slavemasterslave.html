@@ -250,7 +250,7 @@ function parse_script(script_text) {
     // }
     if (i_am_master)
         populate_slidelist();
-    if (script.length > 3)
+    if (script.length > 0)
         script_recieved = true;
     else if (script_attempts<script_get_n) {
         log('script', 'attempt',script_attempts);
