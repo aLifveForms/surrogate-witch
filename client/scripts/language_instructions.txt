@@ -1,9 +1,38 @@
 // Help on script language and commands
-
-// Wait here until master commands us to go elsewhere
-wait
-// 
+// These are the available commands that will be explained:
 flicker
+This is just a normal message
+3000ms
+audio /client/files/file.mp3
+3000ms
+video /client/files/video.mp4 /client/files/video_backup.gif
+3000ms
+/client/files/image.jpg
+3000ms
+/files/
+3000ms
+http://google.com
+wait
+
+
+
+// Wait here until master commands users to go elsewhere
+wait
+
+// 
+// FLICKER
+// 
+
+// flicker screen for random time between 0.5 and 2 seconds
+flicker
+wait
+// flicker screen for random time between 2.5 and 10 seconds
+flicker 10000 2500
+wait
+// flicker screen for exactly 4 seconds
+flicker 4000 4000
+wait
+
 
 //
 // AUDIO
@@ -85,6 +114,54 @@ wait
 // do this 10 times:
 goto -1 10
 wait
+
+
+
+//
+// INTERESTING SNIPPETS FROM PREVIOUS SHOWS
+//
+
+
+// for apple store we used 'goto -13' with a button to 
+// create a loop asking user to click button
+// the button when clicked will jump + 2, past the goto -13 loop call 
+Now
+3000ms
+Plug it into this iDevice
+5000ms
+Now
+4000ms
+<button onclick="goto(position+2)">I am connected</button><br><br>  <span style="font-size:0.5em"><i>(click ^button^ when ready)</i></span>
+goto -7
+&nbsp;
+wait
+
+// This next one causes the applestore page to fade out to white?
+/client/apple.com
+//http://apple.com
+&nbsp; background_#000
+400ms
+&nbsp; background_#222
+400ms
+&nbsp; background_#444
+400ms
+&nbsp; background_#666
+400ms
+&nbsp; background_transparent
+wait
+
+
+// Galium video
+// set the background of message window to transparent
+&nbsp; background_transparent
+video /client/Gallium_on_an_iPhone6_2000k_1024x.mp4 /client/Gallium_on_an_iPhone6_10_480_pal.gif loop autoplay muted webkit-playsinline width=100% height=100%
+6000ms
+flicker
+
+// Placing a image in the middle of the window?
+<img src="/client/rare_earth/Pictures/Element pics/Gallium/3046586-poster-p-1-will-sillicon-valley-become-gallium-valley-this-inventor-hopes-so.jpg" height=30% style="margin-right:6em">
+
+
 breathing
 flicker 5000ms
 // hide witch (show apple layer)

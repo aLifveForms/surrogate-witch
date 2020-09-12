@@ -227,7 +227,7 @@ window.onload = function () {
     parse_hash(); // gets script if needbe. sets master controls if needbe
     setup_socket();
     conductor();
-    if (is_iOS && !i_am_master)
+    if ((is_iOS||is_Android) && !i_am_master)
         document.getElementById('controlbox').style.display = 'none';
 }
 
@@ -321,12 +321,31 @@ window.addEventListener("keypress", function (e) {
  setup_poll();
 *************************************************/
 
+var check_socket_setup_finished;
 function parse_hash() {
     var hash = window.location.hash.substr(1);
     if (!hash) return;
     if (hash.substr(0,4) == 'http') {
         log('onhashchange', 'new script', hash);
         http_get(hash, parse_script)
+    }
+    else if (hash.substr(0,5) == 'goto=') {
+        log('onhashchange', 'goto line & new script', hash);
+        var lineno = parseInt( hash.substr(5,hash.indexOf('@')-5) )
+        var url = hash.substr(hash.indexOf('@')+1);
+        // wait for socket connection to finish.
+        // to handle user browser refresh the server sends a slide position on reconnect
+        // so we have to wait for connect to finish and that position change to finish
+        check_socket_setup_finished = window.setInterval(function(){
+            if (master_state_ready) {
+                log('onhashchange', 'goto line & new script: now ', url, lineno);
+                window.clearInterval(check_socket_setup_finished);
+                http_get(url, function(responseText){
+                    parse_script(responseText);
+                    change_script_position(lineno);
+                });
+            }
+        }, 500)
     }
     else if (hash.substr(0,6) == "master") {
         master_passcode = hash.substr(6);
@@ -372,7 +391,7 @@ function setup_master_control() {
         document.getElementById('slidelistbox').style.width='99%';
         // document.getElementById('slidelistboxtable').style.width="1px";
         controlbox.style.position   = "relative";
-        if (is_iOS) {
+        if (is_iOS||is_Android) {
             controlbox.style.fontSize   = "33pt";
             document.getElementById('force_prev_button').style.width = '40%';
             document.getElementById('force_prev_button').style.fontSize = '88pt';
@@ -415,11 +434,11 @@ function preloadimages(script) {
         }
         else if (line.substr(0,5) == "video") {
             var urls = line.split(/\s+/);
-            url = is_iOS ? urls[2] : urls[1];
+            url = (is_iOS||is_Android) ? urls[2] : urls[1];
             if (url == 'about:blank')
                 continue
-            log('preloadvideo', is_iOS, url);
-            if (is_iOS) {
+            log('preloadvideo', is_iOS, is_Android, url);
+            if (is_iOS||is_Android) {
                 var img     = new Image();
                 img.src     = url;
                 img.onload  = function(e) {log('preloadvideo_iOS','loaded',e.target.src)}
@@ -502,13 +521,15 @@ function url_is_img(url) {
 }
 var win;
 var is_iOS = navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false;
+var is_Android = navigator.userAgent.match(/android/i) ? true : false;
+
 //var is_iOS =/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 var popups_allowed = true;
 function set_popup(url, width, height) {
     if (isNaN(width))  width  = default_popup_width;
     if (isNaN(height)) height = default_popup_height;
-    if (is_iOS) {
-        log('set_popup','is_iOS set_hidden',url);
+    if (is_iOS || is_Android) {
+        log('set_popup','is_iOS||is_Android set_hidden',url);
         set_hidden(url);
     }
     else if (popups_allowed) {
@@ -526,7 +547,7 @@ function set_popup(url, width, height) {
     //win.resizeTo(width,height);
 }
 function close_popup() {
-    if (typeof win == "object" && !is_iOS && popups_allowed)
+    if (typeof win == "object" && (!is_iOS&&!is_Android) && popups_allowed)
         win.close();
     else
         close_hidden();
@@ -749,8 +770,8 @@ function conductor() {
         position += 1;
         conductor();
     }
-    else if ( ! isNaN( line.replace('ms','') ) ) {
-        log('conductor', 'WAIT', line);
+    else if (line.indexOf('ms')>0 && ! isNaN( line.replace('ms','') ) ) {
+        log('conductor', 'WAIT ms', line+' '+(new Date()).getTime());
         // eg. 4000ms means wait for 4000ms before continuing
         // if (i_am_master) master_emit_init(position+1);
         conductor_timeout = window.setTimeout(function(){position+=1;conductor()}, parseInt(line.replace('ms','')));
@@ -941,7 +962,7 @@ function conductor() {
         }
         var ios_gif = args[2];
         var options = args[3] ? args.slice(3).join(' ') : '';
-        if (is_iOS) {
+        if (is_iOS||is_Android) {
             frame_image.innerHTML = '<img id=image id=video src="'+ios_gif+'" '+options+' style="object-fit: cover;">';
         }
         else {
@@ -954,7 +975,7 @@ function conductor() {
         var args = line.split(/\s+/);
         var urls = args.splice(1);
         function popup_test(url) {
-            if (!is_iOS) {
+            if (!is_iOS && !is_Android) {
                 window.open(url, "win"+popi, "scrollbars=no, location=no, locationbar=no, menubar=no, width=200, height=300");
                 popi+=1;
             }

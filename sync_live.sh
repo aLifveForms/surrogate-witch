@@ -4,6 +4,7 @@ EXCLUDEFLAGS="
 --exclude configuration.sh
 --exclude node_modules
 --exclude script_praha.txt
+--exclude script_current.txt
 --exclude .git
 "
 [ $# -le 0 ] && echo "$0 <domain|ptxx.cc>" && exit 1

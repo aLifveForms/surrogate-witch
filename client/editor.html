@@ -66,7 +66,7 @@ window.onload = function() {
     if (localStorage.hasOwnProperty('passcode'))
         passcodeChange(localStorage.passcode)
 
-    makeSaveButtonFloat()
+    makeFloatingButtons()
 }
 
 function parse_hash() {
@@ -85,7 +85,16 @@ function parse_hash() {
             populate_slidelist();
     }
 }
-
+function goto_script_line(linenum=false) {
+    if (!linenum) {
+        var files = document.querySelectorAll('select[name=files]')[0]
+        var filename = files.options[files.selectedIndex]
+        //.value.replace('/client/files/')
+        var linenum = prompt('which line number should we start script ('+filename+'):', '0');
+        var url = '/#goto='+linenum+'@'+filename.value
+        window.open(url, '_blank'); 
+    }
+}
 
     </script>
 <script>    
@@ -172,17 +181,18 @@ function parse_hash() {
         document.getElementById("saveas_filename").value = filename
         document.getElementById("scriptedit").submit()
     }
-    function makeSaveButtonFloat() {
-        var btn = document.getElementById('scripteditsave')
+    function makeFloatingButtons() {
+        var span = document.getElementById('floatingbuttons')
+        // var btn = document.getElementById('scripteditsave')
         // var top = btn.offsetTop+2
         // var left = btn.offsetLeft+2
-        var rect = btn.getBoundingClientRect()
+        var rect = span.getBoundingClientRect()
         var top = rect.y
         var left = rect.x
-        btn.style.position='fixed'
-        btn.style.left=left;
-        btn.style.top=top;
-        btn.style.zIndex=100000;
+        span.style.position='fixed'
+        span.style.left=left;
+        span.style.top=top;
+        span.style.zIndex=100000;
 
     }
     function openScript() { 
@@ -201,7 +211,10 @@ function parse_hash() {
         <br><input type=button name=open value="open" onclick=openScript()> 
         <input type=submit name=makedefault value="make default"> 
         <input type=button name=saveas value="save as new" onclick=saveAs()>
-        <input type=submit id=scripteditsave name=save value="save"> 
+        <span id=floatingbuttons>
+            <input type=submit id=scripteditsave name=save value="save"> 
+            <button onclick="goto_script_line()">try</button>
+        </span>
     </td></table>
 
         <br>
