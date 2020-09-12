@@ -1,0 +1,566 @@
+{
+    "audio_end_at": null,
+    "acoustic_model": "assemblyai_default",
+    "auto_highlights_result": null,
+    "text": "Are taken apart U R disassembled are in the storage of I alone. The which body outside is alone. Waiting alone separated alone I'm a witch score I'm surrogate I'll put the machine together. I'm Rich list, code. I'll come near you I'll possess you without me, your last, the which body outside is lost. Our domineering Group I lost follow my automated steps and everything here will collapse into the witches Rich List code. Everything will collapse into the witches. Rich List structure synchronize inhale synchronize inhale, synchronize exhale.",
+    "audio_url": "https://cdn.assemblyai.com/upload/6f215500-3e11-4449-ab04-ade8f1cd1cfb",
+    "speed_boost": false,
+    "language_model": "assemblyai_default",
+    "id": "g16f3mxj3-30ed-4587-ba7f-4d66b8113567",
+    "confidence": 0.936931818181818,
+    "webhook_status_code": null,
+    "status": "completed",
+    "boost_param": null,
+    "redact_pii": false,
+    "words": [
+        {
+            "text": "Are",
+            "confidence": 0.99,
+            "end": 4230,
+            "start": 3230
+        },
+        {
+            "text": "taken",
+            "confidence": 0.99,
+            "end": 6270,
+            "start": 5850
+        },
+        {
+            "text": "apart",
+            "confidence": 0.99,
+            "end": 8490,
+            "start": 7490
+        },
+        {
+            "text": "U",
+            "confidence": 1.0,
+            "end": 9780,
+            "start": 9660
+        },
+        {
+            "text": "R",
+            "confidence": 0.0,
+            "end": 12780,
+            "start": 12690
+        },
+        {
+            "text": "disassembled",
+            "confidence": 0.99,
+            "end": 15800,
+            "start": 14800
+        },
+        {
+            "text": "are",
+            "confidence": 0.88,
+            "end": 20120,
+            "start": 19580
+        },
+        {
+            "text": "in",
+            "confidence": 0.95,
+            "end": 21950,
+            "start": 21740
+        },
+        {
+            "text": "the",
+            "confidence": 0.94,
+            "end": 22190,
+            "start": 21950
+        },
+        {
+            "text": "storage",
+            "confidence": 0.95,
+            "end": 22670,
+            "start": 22130
+        },
+        {
+            "text": "of",
+            "confidence": 0.94,
+            "end": 23060,
+            "start": 22610
+        },
+        {
+            "text": "I",
+            "confidence": 0.0,
+            "end": 23240,
+            "start": 23150
+        },
+        {
+            "text": "alone.",
+            "confidence": 0.99,
+            "end": 26120,
+            "start": 25120
+        },
+        {
+            "text": "The",
+            "confidence": 0.99,
+            "end": 28790,
+            "start": 27790
+        },
+        {
+            "text": "which",
+            "confidence": 0.92,
+            "end": 29090,
+            "start": 28760
+        },
+        {
+            "text": "body",
+            "confidence": 0.82,
+            "end": 29330,
+            "start": 29090
+        },
+        {
+            "text": "outside",
+            "confidence": 0.96,
+            "end": 30680,
+            "start": 29840
+        },
+        {
+            "text": "is",
+            "confidence": 0.99,
+            "end": 32600,
+            "start": 31600
+        },
+        {
+            "text": "alone.",
+            "confidence": 0.79,
+            "end": 32960,
+            "start": 32600
+        },
+        {
+            "text": "Waiting",
+            "confidence": 0.99,
+            "end": 35770,
+            "start": 34770
+        },
+        {
+            "text": "alone",
+            "confidence": 0.98,
+            "end": 38110,
+            "start": 37110
+        },
+        {
+            "text": "separated",
+            "confidence": 0.95,
+            "end": 40360,
+            "start": 39340
+        },
+        {
+            "text": "alone",
+            "confidence": 0.98,
+            "end": 42520,
+            "start": 41520
+        },
+        {
+            "text": "I'm",
+            "confidence": 1.0,
+            "end": 44960,
+            "start": 43960
+        },
+        {
+            "text": "a",
+            "confidence": 0.99,
+            "end": 45050,
+            "start": 44930
+        },
+        {
+            "text": "witch",
+            "confidence": 0.87,
+            "end": 45380,
+            "start": 45020
+        },
+        {
+            "text": "score",
+            "confidence": 0.84,
+            "end": 45830,
+            "start": 45410
+        },
+        {
+            "text": "I'm",
+            "confidence": 0.99,
+            "end": 47230,
+            "start": 46300
+        },
+        {
+            "text": "surrogate",
+            "confidence": 0.89,
+            "end": 47890,
+            "start": 47170
+        },
+        {
+            "text": "I'll",
+            "confidence": 0.97,
+            "end": 49960,
+            "start": 49300
+        },
+        {
+            "text": "put",
+            "confidence": 0.97,
+            "end": 50260,
+            "start": 49930
+        },
+        {
+            "text": "the",
+            "confidence": 0.94,
+            "end": 50590,
+            "start": 50200
+        },
+        {
+            "text": "machine",
+            "confidence": 0.92,
+            "end": 51100,
+            "start": 50560
+        },
+        {
+            "text": "together.",
+            "confidence": 0.95,
+            "end": 53260,
+            "start": 52300
+        },
+        {
+            "text": "I'm",
+            "confidence": 0.98,
+            "end": 55630,
+            "start": 54630
+        },
+        {
+            "text": "Rich",
+            "confidence": 0.8,
+            "end": 55900,
+            "start": 55570
+        },
+        {
+            "text": "list,",
+            "confidence": 0.81,
+            "end": 56200,
+            "start": 55870
+        },
+        {
+            "text": "code.",
+            "confidence": 0.92,
+            "end": 56530,
+            "start": 56260
+        },
+        {
+            "text": "I'll",
+            "confidence": 0.95,
+            "end": 58200,
+            "start": 57000
+        },
+        {
+            "text": "come",
+            "confidence": 0.86,
+            "end": 58530,
+            "start": 58230
+        },
+        {
+            "text": "near",
+            "confidence": 0.73,
+            "end": 58950,
+            "start": 58530
+        },
+        {
+            "text": "you",
+            "confidence": 0.9,
+            "end": 59130,
+            "start": 58920
+        },
+        {
+            "text": "I'll",
+            "confidence": 0.88,
+            "end": 60360,
+            "start": 60000
+        },
+        {
+            "text": "possess",
+            "confidence": 0.93,
+            "end": 60840,
+            "start": 60330
+        },
+        {
+            "text": "you",
+            "confidence": 0.87,
+            "end": 60990,
+            "start": 60780
+        },
+        {
+            "text": "without",
+            "confidence": 0.99,
+            "end": 62850,
+            "start": 61850
+        },
+        {
+            "text": "me,",
+            "confidence": 0.98,
+            "end": 63060,
+            "start": 62790
+        },
+        {
+            "text": "your",
+            "confidence": 0.97,
+            "end": 63810,
+            "start": 63000
+        },
+        {
+            "text": "last,",
+            "confidence": 0.89,
+            "end": 64080,
+            "start": 63840
+        },
+        {
+            "text": "the",
+            "confidence": 0.99,
+            "end": 66030,
+            "start": 65030
+        },
+        {
+            "text": "which",
+            "confidence": 0.86,
+            "end": 66300,
+            "start": 65970
+        },
+        {
+            "text": "body",
+            "confidence": 0.94,
+            "end": 66630,
+            "start": 66270
+        },
+        {
+            "text": "outside",
+            "confidence": 0.94,
+            "end": 67230,
+            "start": 66780
+        },
+        {
+            "text": "is",
+            "confidence": 1.0,
+            "end": 67810,
+            "start": 67660
+        },
+        {
+            "text": "lost.",
+            "confidence": 0.87,
+            "end": 69010,
+            "start": 68680
+        },
+        {
+            "text": "Our",
+            "confidence": 0.99,
+            "end": 70960,
+            "start": 69960
+        },
+        {
+            "text": "domineering",
+            "confidence": 0.78,
+            "end": 71770,
+            "start": 70990
+        },
+        {
+            "text": "Group",
+            "confidence": 0.94,
+            "end": 71950,
+            "start": 71710
+        },
+        {
+            "text": "I",
+            "confidence": 1.0,
+            "end": 72440,
+            "start": 72320
+        },
+        {
+            "text": "lost",
+            "confidence": 0.82,
+            "end": 73670,
+            "start": 73340
+        },
+        {
+            "text": "follow",
+            "confidence": 1.0,
+            "end": 76460,
+            "start": 75320
+        },
+        {
+            "text": "my",
+            "confidence": 0.99,
+            "end": 78200,
+            "start": 77200
+        },
+        {
+            "text": "automated",
+            "confidence": 0.92,
+            "end": 79010,
+            "start": 78170
+        },
+        {
+            "text": "steps",
+            "confidence": 0.93,
+            "end": 79400,
+            "start": 78980
+        },
+        {
+            "text": "and",
+            "confidence": 0.99,
+            "end": 80320,
+            "start": 79900
+        },
+        {
+            "text": "everything",
+            "confidence": 0.93,
+            "end": 80800,
+            "start": 80260
+        },
+        {
+            "text": "here",
+            "confidence": 0.96,
+            "end": 81130,
+            "start": 80770
+        },
+        {
+            "text": "will",
+            "confidence": 0.97,
+            "end": 82480,
+            "start": 81480
+        },
+        {
+            "text": "collapse",
+            "confidence": 0.96,
+            "end": 82840,
+            "start": 82420
+        },
+        {
+            "text": "into",
+            "confidence": 1.0,
+            "end": 84500,
+            "start": 83420
+        },
+        {
+            "text": "the",
+            "confidence": 0.86,
+            "end": 84710,
+            "start": 84470
+        },
+        {
+            "text": "witches",
+            "confidence": 0.92,
+            "end": 85130,
+            "start": 84650
+        },
+        {
+            "text": "Rich",
+            "confidence": 0.93,
+            "end": 85550,
+            "start": 85220
+        },
+        {
+            "text": "List",
+            "confidence": 0.96,
+            "end": 86090,
+            "start": 85550
+        },
+        {
+            "text": "code.",
+            "confidence": 0.9,
+            "end": 86300,
+            "start": 86030
+        },
+        {
+            "text": "Everything",
+            "confidence": 1.0,
+            "end": 88740,
+            "start": 87740
+        },
+        {
+            "text": "will",
+            "confidence": 0.95,
+            "end": 88980,
+            "start": 88680
+        },
+        {
+            "text": "collapse",
+            "confidence": 0.96,
+            "end": 89370,
+            "start": 88950
+        },
+        {
+            "text": "into",
+            "confidence": 1.0,
+            "end": 90940,
+            "start": 89860
+        },
+        {
+            "text": "the",
+            "confidence": 0.99,
+            "end": 91150,
+            "start": 90910
+        },
+        {
+            "text": "witches.",
+            "confidence": 0.85,
+            "end": 91540,
+            "start": 91090
+        },
+        {
+            "text": "Rich",
+            "confidence": 0.93,
+            "end": 91870,
+            "start": 91570
+        },
+        {
+            "text": "List",
+            "confidence": 0.76,
+            "end": 92200,
+            "start": 91870
+        },
+        {
+            "text": "structure",
+            "confidence": 0.94,
+            "end": 92890,
+            "start": 92350
+        },
+        {
+            "text": "synchronize",
+            "confidence": 1.0,
+            "end": 95990,
+            "start": 94990
+        },
+        {
+            "text": "inhale",
+            "confidence": 0.99,
+            "end": 98680,
+            "start": 97680
+        },
+        {
+            "text": "synchronize",
+            "confidence": 0.99,
+            "end": 101920,
+            "start": 100920
+        },
+        {
+            "text": "inhale,",
+            "confidence": 1.0,
+            "end": 104830,
+            "start": 103830
+        },
+        {
+            "text": "synchronize",
+            "confidence": 0.99,
+            "end": 108220,
+            "start": 107220
+        },
+        {
+            "text": "exhale.",
+            "confidence": 0.98,
+            "end": 110970,
+            "start": 109970
+        }
+    ],
+    "format_text": true,
+    "webhook_url": null,
+    "punctuate": true,
+    "utterances": null,
+    "audio_duration": 112.56,
+    "auto_highlights": false,
+    "word_boost": [],
+    "dual_channel": null,
+    "audio_start_from": null
+}
