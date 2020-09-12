@@ -231,11 +231,12 @@ var storage =   multer.diskStorage({
     callback(null, filename);
  }
 });
-var upload = multer({ storage : storage }).array('files',2);
+var upload = multer({ storage : storage }).array('files',999);
 app.post('/upload',function(req,res){
     console.log('/upload',req.file)
     upload(req,res,function(err) {
         if(err) {
+            console.error(err)
             return res.end("Error uploading file.");
         }
         res.redirect('back');
