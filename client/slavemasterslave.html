@@ -782,6 +782,8 @@ function conductor() {
         // if not popup but url is a image, load into image div we can control width on
         var popup = false;
         var interactive = false; // if true the standard url load for non images will be on top, by hiding message box
+        var keep_layer_1 = false; // if true will keep layer1 visible when image is loaded
+
         var width = "max";
         var height = "max";
         var args = line.split(" ");
@@ -799,18 +801,21 @@ function conductor() {
         if ( typeof arg1 != 'undefined') {
             if      (arg1.indexOf("popup") >= 0)       popup       = true;
             else if (arg1.indexOf("interactive") >= 0) interactive = true;
+            else if (arg1.indexOf("transparent") >= 0) keep_layer_1 = true;
             else if (arg1.indexOf("width_") >= 0)      width       = arg1.substr(6);
             else if (arg1.indexOf("height_") >= 0)     height      = arg1.substr(7);
         }
         if ( typeof arg2 != 'undefined') {
             if      (arg2.indexOf("popup") >= 0)       popup       = true;
             else if (arg2.indexOf("interactive") >= 0) interactive = true;
+            else if (arg1.indexOf("transparent") >= 0) keep_layer_1 = true;
             else if (arg2.indexOf("width_") >= 0)      width       = arg2.substr(6);
             else if (arg2.indexOf("height_") >= 0)     height      = arg2.substr(7);
         }
         if ( typeof arg3 != 'undefined') {
             if      (arg3.indexOf("popup") >= 0)       popup       = true;
             else if (arg3.indexOf("interactive") >= 0) interactive = true;
+            else if (arg1.indexOf("transparent") >= 0) keep_layer_1 = true;
             else if (arg3.indexOf("width_") >= 0)      width       = arg3.substr(6);
             else if (arg3.indexOf("height_") >= 0)     height      = arg3.substr(7);
         }
@@ -826,9 +831,10 @@ function conductor() {
             // image.style.height = "";
             // if (width.length > 0)  image.style.width  = width;
             // if (height.length > 0) image.style.height = height;
-            frame_1.style.display = "none";
+            if (!keep_layer_1)
+                frame_1.style.display = "none";
             frame_image.style.display = "block";
-            var imghtml =  "<img id=image src='"+url+"'";
+            var imghtml =  "<img id=image style='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);' src='"+url+"'";
             if (width.length > 0)  imghtml += ' width='+width;
             if (height.length > 0) imghtml += ' height='+height;
             frame_image.innerHTML = imghtml+'>';
