@@ -1,1 +1,1 @@
-scripts/test1.txt
+scripts/script_applestore.txt
