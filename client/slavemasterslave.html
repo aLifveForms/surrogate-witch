@@ -659,7 +659,7 @@ function conductor() {
     if (typeof script == 'undefined' || !script_recieved || !master_state_ready || !loading_seq_complete) {
         // page not loaded yetmessage
         log('conductor','waiting for script & master_state');
-        window.setTimeout(conductor, 1000);
+        conductor_timeout = window.setTimeout(conductor, 1000);
         return;
     }
     // Loop Until script is ready, and master_state_ready
