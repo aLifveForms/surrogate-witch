@@ -21,7 +21,7 @@ var script_file         = './client/script_applestore.txt'
 if (TRANSMEDIALE)
     script_file = './client/script_transmediale.txt'
 if (PRAHA)
-    script_file = './client/script_praha.txt' // PRAHA versoin
+    script_file = './client/script_praha.txt' // PRAHA version
 if (MULTISCRIPT) {
     script_file = 'client/script_current.txt'
     script_file_target = 'client/'+fs.readlinkSync(script_file);
@@ -98,8 +98,6 @@ app.use('/client', express.static(__dirname + '/client'));
 app.use('/client/files', serve_index(__dirname + '/client/files'));
 app.use('/client/scripts', serve_index(__dirname+'/client/scripts'));
 
-
-
 var walkSync = function(dir, filelist) {
   var fs = fs || require('fs'),
       files = fs.readdirSync(dir);
@@ -171,6 +169,52 @@ app.get(['/editor','/editor/:script_file'], function (req, res) {
             );
     }
 });
+//
+// ugly captive portal
+//
+// How android needs it in order to be happy
+//   Sends 2 or more requests to generate domains and should get back redirects first to get the login page, but then 204s after to get connected
+//  https://twitter.com/nathanafain/status/1304015296118874114
+//   
+// wifi clients timestamp when last pressed ok
+// if we get 204 request and it has been more than 30 seconds, give a 302 again, else 204
+var wifis = {//ip: timestamp
+}
+app.get(['/generate_204','/gen_204'], function (req, res) {
+    console.log('generate_204',wifis);
+    // don't for get in nginx proxy definition: proxy_set_header X-Forwarded-For $remote_addr;
+    var clientip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    var now = (new Date()).getTime()/1000;
+    if (wifis.hasOwnProperty(clientip) && now < wifis[clientip]+30 ) {
+        res.status(204).send({});
+    }
+    else {
+        // user has to click ok
+        // res.end('<html><form action=/captiveportalok><input type=submit></form></html>')
+        // don't ask, just go:
+        res.redirect('http://l.ptxx.cc/captiveportalok/'+clientip)
+    }
+    //res.end('<html><head><meta http-equiv="refresh" content="0;url=/captiveportal204"></head><body>Success</body></html>');    
+    // if (okpressed)
+    //     return res.status(204).send({});
+    // res.redirect('http://l.ptxx.cc/captiveportalok')
+});
+app.get('/captiveportalask', function (req, res) {
+    console.log('captiveportalask')
+    res.end('<html><form action=/captiveportalok><input type=submit></form></html>')
+});
+app.get(['/captiveportalok','/captiveportalok/:ip'], function (req, res) {
+    var clientip = req.headers['x-forwarded-for'] || req.params.ip || req.connection.remoteAddress;
+    console.log('captiveportalok',clientip);
+    wifis[clientip] = (new Date()).getTime()/1000;
+    res.end('<html><head><meta http-equiv="refresh" content="0;url=/captiveportal204"></head><body>Success</body></html>');
+    //res.status(204).send({});
+});
+app.get('/captiveportal204', function (req, res) {
+    console.log('captiveportal204')
+    res.status(204).send();
+});
+
 
 var multer = require('multer');
 var bodyParser = require('body-parser');
