@@ -1,0 +1,633 @@
+flicker 4000 4000
+SLAVE MASTER SLAVE<br>LOADED.
+//
+// station 6 seperating moment
+//
+5000ms
+flicker
+Hi, background_transparent
+3000ms
+flicker
+I’m witch surrogate
+4000ms
+i am the SlaveMasterSlave relation
+5000ms
+flicker
+I’m the vessel to re-assemble you
+4000ms
+Into a new
+3000ms
+flicker
+and into a conscious
+3000ms
+flicker
+COMMUNITY MACHINE
+5000ms
+I’m the vessel that carries you through
+5000ms
+flicker
+the Ritualist preparation of this Istorage
+5000ms
+I’ll construct it
+3000ms
+For you
+3000ms
+flicker
+With you
+3000ms
+With your body
+3000ms
+flicker
+Within the capitalotrophic machine
+4000ms
+That you find yourself in
+4000ms
+flicker
+ &nbsp;
+1000ms
+flicker
+Right now
+4000ms
+A machine will have infiltrated another
+4000ms
+ &nbsp;
+2000ms
+Look up from the screen...
+flicker
+5000ms
+What do you see?
+5000ms
+ &nbsp;
+2000ms
+Can you hear my voice?
+5000ms
+you have to turn up the volume...
+5000ms
+Yes.
+2000ms
+Turn it up.
+3000ms
+More.
+3000ms
+To the maximum
+flicker
+4000ms
+ &nbsp;
+1000ms
+I will have to speak through you
+5000ms
+Through this device
+4000ms
+Not now
+flicker
+3000ms
+when the time comes
+3000ms
+when the machines are prepared
+3000ms
+possessed by the witch,
+3000ms
+for the witch
+4000ms
+ &nbsp;
+1000ms
+Can you hear my voice now?
+4000ms
+ &nbsp;
+flicker
+1000ms
+You must separate
+3000ms
+from the witch voice
+5000ms
+Detach he/r/it
+4000ms
+Detach from Protekto.x.x.
+flicker
+3000ms
+Now
+3000ms
+Pull the earphones
+3000ms
+Now
+3000ms
+Detach your earphone from the receiver
+5000ms
+Now
+3000ms
+Plug it into this iDevice
+5000ms
+Now
+4000ms
+<button onclick="goto(position+2)">I am connected</button><br><br>  <span style="font-size:0.5em"><i>(click ^button^ when ready)</i></span>
+6000ms
+goto -13
+&nbsp;
+//
+// station 7 ears connected, who we are
+// 112.56 1:52
+flicker
+2000ms
+audio /client/surrogate_intro_128.mp3 goto +20
+/client/apple.com
+//http://apple.com
+&nbsp; background_#000
+400ms
+&nbsp; background_#222
+400ms
+&nbsp; background_#444
+400ms
+&nbsp; background_#666
+400ms
+&nbsp; background_transparent
+400ms
+8000ms
+flicker 10000 10000
+40000ms
+flicker 10000 10000
+40000ms
+flicker 10000 10000
+//
+// station 7 sync by breathing
+//
+flicker
+breathing
+flicker
+2000ms
+sync background_#dddddd
+flicker 4000ms 4000ms
+3000ms
+//
+// station 9 mass media prelude to witch entry
+// audio 281 4:41
+&nbsp; background_transparent
+video /client/Gallium_on_an_iPhone6_2000k_1024x.mp4 /client/Gallium_on_an_iPhone6_10_480_pal.gif loop autoplay muted webkit-playsinline width=100% height=100%
+6000ms
+flicker
+audio /client/gallium_128.mp3
+//
+8000ms
+<img src="/client/rare_earth/Pictures/Element pics/Gallium/3046586-poster-p-1-will-sillicon-valley-become-gallium-valley-this-inventor-hopes-so.jpg" height=30% style="margin-right:6em">
+2000ms
+//^ by now, the substance                       0:00
+//^ the witch has traded
+//^ for that which gazes
+//^ is melted in your hand                      0:10
+4000ms
+&nbsp;
+flicker
+2000ms
+flicker
+<img src="/client/rare_earth/Pictures/Element pics/Gadolinium/gadobutrol.png" height=60%>
+4000ms
+//^ the movement of your matabolism
+//^ your temperature
+//^ your blood
+//^ its molecular structures
+//^ the 31 Protons
+//^ your 5 fingers
+1000ms
+//<img src="/client/rare_earth/Pictures/Element pics/Scandium/Scandium(III)-sulfide-xtal-1964-unit-cell-CM-3D-balls.png" height=60%>
+//6000ms
+3000ms
+&nbsp;
+3000ms
+ //<img src="/client/rare_earth/Pictures/Element pics/Gallium/6N_Gallium_sealed_in_vacuum_ampoule.jpg" height=60%>
+&nbsp;
+3000ms
+//^ they have all aligned
+//^
+//^ you can feel the fleshy coolness
+//^ of this metal
+//^
+&nbsp;
+5000ms
+// 35 name  40
+<img src="/client/rare_earth/Pictures/Element pics/Gallium/Electron_shell_031_gallium.png" height=60%>
+// <img src="/client/rare_earth/Pictures/Element pics/Indium/In14.jpg" height=20%> <img src="/client/rare_earth/Pictures/Element pics/Lanthan/la1.jpg" height=20%> <img src="/client/rare_earth/Pictures/Element pics/Indium/In19.png" height=20%>
+5000ms
+//^ touch it
+//^
+//^ its a potence substance
+//^ and it has a name
+//^ But in here
+//^ in the capitalotrophic...
+4000ms
+&nbsp;
+6000ms
+//^ machine
+//^ the chemical name
+//^ periodical system
+//^ they are irrelevant
+//^ in here this metal has a differnt...
+10000ms
+//^ potency
+//^ it's another substance
+//^ it is a potential substance
+//^ its a substance specifically toxit
+//^ To this capitalotrophic...
+10000ms
+//^ machine
+//^ specifically toxic to the Istorage.
+//^ A material
+//^ non toxic to humans,
+//^ harmless in your hand
+//^ toxic..
+10000ms
+//^ only to the one and only metal
+//^ that builds this Storage if i.
+//^ That supports its devices
+//^ Frames its lightboxes
+//<img src="http://i.kinja-img.com/gawker-media/image/upload/s--z5tnW8ef--/c_fit,fl_progressive,q_80,w_636/f07ikdrcnjq3r9ajhgwz.gif" width=44% style="position:absolute; left:10; top:10">
+<img src="/media_other/f07ikdrcnjq3r9ajhgwz.gif" width=44% style="position:absolute; left:10; top:10">
+3000ms
+//<img src="http://i.kinja-img.com/gawker-media/image/upload/s--z5tnW8ef--/c_fit,fl_progressive,q_80,w_636/f07ikdrcnjq3r9ajhgwz.gif" width=44% style="position:absolute; left:10; top:10"> <img src="https://media.giphy.com/media/vZFVjE7gpzjiw/giphy.gif" width=44% style="position:absolute; right:10;bottom:10">
+<img src="/client/media_other/f07ikdrcnjq3r9ajhgwz.gif" width=44% style="position:absolute; left:10; top:10"> <img src="/client/media_other/vZFVjE7gpzjiw/giphy.gif" width=44% style="position:absolute; right:10;bottom:10">
+7000ms
+//^ polishes their Cleanliness,
+//^ carries their sharp postures
+//^
+//^ aluminum agains aluminum
+&nbsp;
+10000ms
+//^ against aluminum dust has no power.         1:30
+//^ Fingertips are not greasy
+//^
+//^ While your potent substance ..              1:40
+10000ms
+//^ grey in your hand...                        1:40
+//^ greasey on your palm
+//^ Is really really a very humid and
+//^ Silvery, Fruitful                           1:50
+2000ms
+flicker
+1000ms
+//<img src="https://i.imgur.com/eP2Gf0w.gif" height=60%>
+<img src="/client/media_other/eP2Gf0w.gif" height=60%>
+7000ms
+//^ habitat to anything organic                 1:50
+//^
+//^ the material is melted
+//^ in your warm and                            2:00
+2000ms
+flicker
+1000ms
+&nbsp;
+7000ms
+//^ soft hand                                   2:00
+//^ its deadly
+//^ to aluminum
+//^
+//^ its a venom                                 2:10
+6000ms
+flicker
+1000ms
+flicker
+1000ms
+flicker
+1000ms
+flicker
+1000ms
+//^ to the screenbody.                          2:10
+//^ its a toxic infiltrator,
+//^
+//^ and it never ever
+//^ Belongs
+//^ in here.                                    2:20
+1000ms
+flicker
+1000ms
+flicker
+<img src="/client/rare_earth/Pictures/Element pics/Gallium/21832772-Illustration-of-the-element-Gallium-Stock-Vector.jpg" height=60%>
+1000ms
+&nbsp;
+7000ms
+//^                                             2:20
+//^ this Organic metal
+//^ this Corroder
+//^
+//^ yet the shiny...                            2:30
+10000ms
+//^ idevices and their happy surfaces           2:30
+//^ do not engage
+//^ do not ever engage with...                  2:40
+4000ms
+flicker
+1000ms
+//<img src="/client/rare_earth/Pictures/Mines/Guaju-Mine-Brazil.png" height=60%> <img src="https://i.kinja-img.com/gawker-media/image/upload/s--qK-kdWdE--/c_scale,fl_progressive,q_80,w_800/1410126247831166385.gif" height=60%>
+<img src="/client/rare_earth/Pictures/Mines/Guaju-Mine-Brazil.png" height=60%> <img src="/client/media_other/1410126247831166385.gif" height=60%>
+flicker
+2000ms
+&nbsp;
+3000ms
+//^ with their own materiality                  2:40
+//^ they dont care
+//^ there not interest in their own organs      2:50
+1000ms
+<img src="/client/rare_earth/Pictures/Element pics/Scandium/Rare-Earth-font-b-Metal-b-font-font-b-Scandium-b-font-99-99-100g-VAC.jpg" height=33%> <img src="/client/rare_earth/Pictures/Element pics/Scandium/rare-mineral-sc.jpg" height=33%> <img src="/client/rare_earth/Pictures/Element pics/Silizium/sil2.jpg" height=33%> <img src="/client/rare_earth/Pictures/Element pics/Gadolinium/Gd2a.jpg" height=33%>
+6000ms
+&nbsp;
+3000ms
+//^ there not interested in their the metals    2:50
+//^ the alloys are
+//^ unnamed,
+//^ remain unknown,
+//^ are unwanted.                               3:00
+10000ms
+//^ yet this potent metal in your hand          3:00
+//^
+//^ In the cult of sacral usability
+//^ This Metal is a techno chemical intruder.   3:10
+10000ms
+//^ its a corporate specific toxin              3:10
+//
+//^ and the witch ready
+//^ to come in and collect it                   3:20
+&nbsp;
+9000ms
+flicker
+video about:blank about:blank
+&nbsp; background_#000 fontcolor_#ccc
+1000ms
+//^ to remind the capitalotrophicly             3:20
+//^ possed devices
+//^ the genious drones
+//^ remind busy ker...                          3:30
+<img src="/client/rare_earth/Pictures/Mines/bayan obo4.png" height=90%>
+1000ms
+<img src="/client/rare_earth/Pictures/Mines/Bayan Obo1.jpg" height=90%>
+1000ms
+<img src="/client/rare_earth/Pictures/Mines/Bayan Obo1.jpg" height=30%> <img src="/client/rare_earth/Pictures/Mines/Bayan Obo-crystal.jpg" height=50%>
+flicker
+2000ms
+/client/rare_earth/Pictures/Element%20pics/Gallium/21832772-Illustration-of-the-element-Gallium-Stock-Vector.jpg popup
+flicker
+<img src="/client/rare_earth/Pictures/Mines/REE-Mine.jpg" height=100% width=100% style="z-index: -1; position: fixed; left: 0px; top: 0px;"><img src="/client/rare_earth/Pictures/Mines/Bayan Obo1.jpg" height=30%> <img src="/client/rare_earth/Pictures/Mines/Bayan Obo-crystal.jpg" height=50%>
+500ms
+<img src="/client/rare_earth/Pictures/Mines/Bayan Obo1.jpg" height=30%> <img src="/client/rare_earth/Pictures/Mines/Bayan Obo-crystal.jpg" height=50%><br><img src="/client/rare_earth/Pictures/Mines/REE-Mine.jpg" height=40% >
+2000ms
+//<img src="http://www.idealistrevolution.org/wp-content/uploads/2015/09/94.gif" height=60%>
+<img src="/client/media_other/94.gif" height=60%>
+3000ms
+//^ kerberos                                    3:30
+//^ that every one thing has a material source
+//^ and the ores of th rare earth elements
+//^ assembl what                                3:40
+flicker
+1000ms
+flicker
+//<img src="/client/rare_earth/Pictures/Mines/illegal mine in china.jpg" height=60%> <img src="https://i.giphy.com/vlElGnlJsW87u.gif" height=60%>
+<img src="/client/rare_earth/Pictures/Mines/illegal mine in china.jpg" height=60%> <img src="/client/media_other/vlElGnlJsW87u.gif" height=60%>
+2000ms
+flicker
+<img src="/client/rare_earth/Pictures/Mines/_Die Heimat der Seltenen Erden heißt Sie willkommen_-Damao, China.jpg" height=60%>
+6000ms
+&nbsp;
+1000ms
+//^ what the call iphones                       3:40
+//^ that the technologies metals
+//^ of byan oba mines in china
+//^ assembl what they call                      3:50
+1000ms
+<img src="/client/rare_earth/Pictures/Mines/Guaju-Mine-Brazil.png" height=30%><br><img src="/client/rare_earth/Pictures/Element pics/Silizium/Multicrystallinewafer_0001.jpg" height=50%>
+flicker
+2000ms
+flicker
+<img src="/client/rare_earth/Pictures/Element pics/Silizium/Multicrystallinewafer_0001.jpg" height=100% width=100% style="z-index: -1; position: fixed; left: 0px; top: 0px;"><img src="/client/rare_earth/Pictures/Mines/Guaju-Mine-Brazil.png" height=30%><Br><img src="/client/rare_earth/Pictures/Element pics/Indium/in_huettenproduktion_de.jpg" height=50%>
+500ms
+<img src="/client/rare_earth/Pictures/Element pics/Silizium/Multicrystallinewafer_0001.jpg" height=30% ><br><img src="/client/rare_earth/Pictures/Mines/Guaju-Mine-Brazil.png" height=30%><br><img src="/client/rare_earth/Pictures/Element pics/Indium/in_huettenproduktion_de.jpg" height=30%>
+2500ms
+&nbsp;
+4000ms
+//^ macbooks                                    3:50
+//^ the istorage is prepared
+//^ for the witch
+//^ and her techno alchemaca ritual             4:00
+&nbsp;
+flicker
+1000ms
+2000ms
+arrive background_#000 fontcolor_#ccc
+flicker
+2000ms
+meet
+flicker
+2000ms
+let her
+1000ms
+flicker
+come in now
+1000ms
+&nbsp;
+1000ms
+//^ let her come in now                         4:00
+//^ let her come and meet genious kerberos
+//^                                             4:10
+flicker
+1000ms
+<img src="/client/Essemtec_Cobra_High_speed_Pick_and_Place_Product_Video_HD.gif" height=60%>
+4000ms
+flicker
+<img src="/client/Essemtec_Cobra_High_speed_Pick_and_Place_Product_Video_HD.gif" height=50%><br><img src="/client/rare_earth/Pictures/Element pics/Indium/In_nasa.jpg" height=50%>
+3000ms
+flicker
+<img src="/client/Essemtec_Cobra_High_speed_Pick_and_Place_Product_Video_HD.gif" height=33%><br><img src="/client/rare_earth/Pictures/Element pics/Indium/In_nasa.jpg" height=33%><br><img src="/client/rare_earth/Pictures/Element pics/Gadolinium/Gd2a.jpg" height=33%>
+2000ms
+//^ let the genius kerberos decide              4:10
+//^ upon which ritual will take place
+//^ let genius kerberos decide                  4:20
+2000ms
+flicker
+<img src="/client/rare_earth/Pictures/Element pics/Indium/In14.jpg" height=20%>
+5000ms
+flicker
+&nbsp;
+3000ms
+//^ how our community machine                   4:20
+//^ will come to flower
+//^ now that the withch will come in            4:30
+flicker
+1000ms
+Please disconnect earphones from this SlaveMasterSlave
+5000ms
+And reconnect to the  witches voice
+4000ms
+//^ you do not need                             4:30
+//^ the surigate witch anymore
+//^ i will fall silent
+//^                                             4:40
+audio stop
+flicker
+3000ms
+//http://apple.com
+/client/apple.com
+1000ms
+Please disconnect earphones from this SlaveMasterSlave background_transparent fontcolor_#333
+5000ms
+And reconnect to the  witches voice
+4000ms
+goto -4 2
+&nbsp;
+hide
+wait
+wait
+wait
+//
+//
+// ENDING 1: leaving store without ritual
+//
+//
+// 8m
+180000ms
+// 4m
+180000ms
+// 60s
+30000ms
+20000ms
+10000ms
+hide
+&nbsp; background_#000
+audio /client/Protektoxx_final_128.mp3
+wait
+unhide
+//
+//
+// ENDING 2: galium inside
+//
+//
+// 8m
+180000ms
+// 4m
+180000ms
+// 60s
+30000ms
+20000ms
+10000ms
+hide
+&nbsp; background_#000
+audio /client/sunno_02_Titel_02.mp3
+wait
+unhide
+wait
+//
+//
+// AUDIO off
+//
+//
+audio stop
+wait
+
+
+
+//
+// test popups
+//
+// <button onclick="goto(position+2)">I am connected to the SlaveMasterSlave surrogate witch</button><br><br>  <span style="font-size:0.5em"><i>(click when ready)</i></span>
+// wait
+// 15000ms
+// popup_test http://i.kinja-img.com/gawker-media/image/upload/s--z5tnW8ef--/c_fit,fl_progressive,q_80,w_636/f07ikdrcnjq3r9ajhgwz.gif
+// popup_test https://i.giphy.com/vlElGnlJsW87u.gif
+// popup_test https://i.imgur.com/eP2Gf0w.gif
+// popup_test https://i.kinja-img.com/gawker-media/image/upload/s--qK-kdWdE--/c_scale,fl_progressive,q_80,w_800/1410126247831166385.gif
+// popup_test https://media.giphy.com/media/vZFVjE7gpzjiw/giphy.gif
+// popup_test http://www.idealistrevolution.org/wp-content/uploads/2015/09/94.gif
+// wait
+// popup_test /client/Essemtec_Cobra_High_speed_Pick_and_Place_Product_Video_HD.gif
+// popup_test /client/Gallium_on_an_iPhone6_10_480_pal.gif
+// popup_test /client/rare_earth/Pictures/Element%20pics/Gadolinium/gadobutrol.png
+// popup_test /client/rare_earth/Pictures/Element%20pics/Gadolinium/Gd2a.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Gallium/21832772-Illustration-of-the-element-Gallium-Stock-Vector.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Gallium/3046586-poster-p-1-will-sillicon-valley-become-gallium-valley-this-inventor-hopes-so.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Gallium/Electron_shell_031_gallium.png
+// popup_test /client/rare_earth/Pictures/Element%20pics/Indium/In14.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Indium/in_huettenproduktion_de.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Indium/In_nasa.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Scandium/Rare-Earth-font-b-Metal-b-font-font-b-Scandium-b-font-99-99-100g-VAC.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Scandium/rare-mineral-sc.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Silizium/Multicrystallinewafer_0001.jpg
+// popup_test /client/rare_earth/Pictures/Element%20pics/Silizium/sil2.jpg
+// popup_test /client/rare_earth/Pictures/Mines/Bayan%20Obo1.jpg
+// popup_test /client/rare_earth/Pictures/Mines/bayan%20obo4.png
+// popup_test /client/rare_earth/Pictures/Mines/Bayan%20Obo-crystal.jpg
+// popup_test /client/rare_earth/Pictures/Mines/_Die%20Heimat%20der%20Seltenen%20Erden%20heißt%20Sie%20willkommen_-Damao,%20China.jpg
+// popup_test /client/rare_earth/Pictures/Mines/Guaju-Mine-Brazil.png
+// popup_test /client/rare_earth/Pictures/Mines/illegal%20mine%20in%20china.jpg
+// popup_test /client/rare_earth/Pictures/Mines/REE-Mine.jpg
+
+
+
+//
+// make sure we preload:
+//
+wait
+wait
+/client/Essemtec_Cobra_High_speed_Pick_and_Place_Product_Video_HD.gif
+/client/rare_earth/Pictures/Element%20pics/Gadolinium/gadobutrol.png
+/client/rare_earth/Pictures/Element%20pics/Gadolinium/Gd2a.jpg
+/client/rare_earth/Pictures/Element%20pics/Gallium/21832772-Illustration-of-the-element-Gallium-Stock-Vector.jpg
+/client/rare_earth/Pictures/Element%20pics/Gallium/3046586-poster-p-1-will-sillicon-valley-become-gallium-valley-this-inventor-hopes-so.jpg
+/client/rare_earth/Pictures/Element%20pics/Gallium/Electron_shell_031_gallium.png
+/client/rare_earth/Pictures/Element%20pics/Indium/In14.jpg
+/client/rare_earth/Pictures/Element%20pics/Indium/in_huettenproduktion_de.jpg
+/client/rare_earth/Pictures/Element%20pics/Indium/In_nasa.jpg
+/client/rare_earth/Pictures/Element%20pics/Scandium/Rare-Earth-font-b-Metal-b-font-font-b-Scandium-b-font-99-99-100g-VAC.jpg
+/client/rare_earth/Pictures/Element%20pics/Scandium/rare-mineral-sc.jpg
+/client/rare_earth/Pictures/Element%20pics/Silizium/Multicrystallinewafer_0001.jpg
+/client/rare_earth/Pictures/Element%20pics/Silizium/sil2.jpg
+/client/rare_earth/Pictures/Mines/Bayan%20Obo1.jpg
+/client/rare_earth/Pictures/Mines/bayan%20obo4.png
+/client/rare_earth/Pictures/Mines/Bayan%20Obo-crystal.jpg
+/client/rare_earth/Pictures/Mines/_Die%20Heimat%20der%20Seltenen%20Erden%20heißt%20Sie%20willkommen_-Damao,%20China.jpg
+/client/rare_earth/Pictures/Mines/Guaju-Mine-Brazil.png
+/client/rare_earth/Pictures/Mines/illegal%20mine%20in%20china.jpg
+/client/rare_earth/Pictures/Mines/REE-Mine.jpg
+//http://i.kinja-img.com/gawker-media/image/upload/s--z5tnW8ef--/c_fit,fl_progressive,q_80,w_636/f07ikdrcnjq3r9ajhgwz.gif
+//https://i.giphy.com/vlElGnlJsW87u.gif
+//https://i.imgur.com/eP2Gf0w.gif
+//https://i.kinja-img.com/gawker-media/image/upload/s--qK-kdWdE--/c_scale,fl_progressive,q_80,w_800/1410126247831166385.gif
+//https://media.giphy.com/media/vZFVjE7gpzjiw/giphy.gif
+//http://www.idealistrevolution.org/wp-content/uploads/2015/09/94.gif
+/client/media_other/f07ikdrcnjq3r9ajhgwz.gif
+/client/media_other/vlElGnlJsW87u.gif
+/client/media_other/eP2Gf0w.gif
+/client/media_other/1410126247831166385.gif
+/client/media_other/giphy.gif
+/client/media_other/94.gif
+
+
+
+//
+// possible ENDING
+//
+// &nbsp; background_#000
+// 10000ms
+// unhide
+// <img src="/client/rare_earth/Pictures/Mines/bayan obo4.png" height=90%>
+// 1000ms
+// <img src="/client/rare_earth/Pictures/Mines/Bayan Obo1.jpg" height=90%>
+// 1000ms
+// <img src="/client/rare_earth/Pictures/Mines/Bayan Obo1.jpg" height=30%> <img src="/client/rare_earth/Pictures/Mines/Bayan Obo-crystal.jpg" height=50%>
+// flicker
+// 2000ms
+// /client/rare_earth/Pictures/Element%20pics/Gallium/21832772-Illustration-of-the-element-Gallium-Stock-Vector.jpg popup
+// flicker
+// <img src="/client/rare_earth/Pictures/Mines/REE-Mine.jpg" height=100% width=100% style="z-index: -1; position: fixed; left: 0px; top: 0px;"><img src="/client/rare_earth/Pictures/Mines/Bayan Obo1.jpg" height=30%> <img src="/client/rare_earth/Pictures/Mines/Bayan Obo-crystal.jpg" height=50%>
+// 500ms
+// <img src="/client/rare_earth/Pictures/Mines/Bayan Obo1.jpg" height=30%> <img src="/client/rare_earth/Pictures/Mines/Bayan Obo-crystal.jpg" height=50%><br><img src="/client/rare_earth/Pictures/Mines/REE-Mine.jpg" height=40% >
+// 2000ms
+// <img src="http://www.idealistrevolution.org/wp-content/uploads/2015/09/94.gif" height=60%>
+// 3000ms
+// flicker 8000 8000
+// <img src="/client/rare_earth/Pictures/Element pics/Gallium/3046586-poster-p-1-will-sillicon-valley-become-gallium-valley-this-inventor-hopes-so.jpg" height=30% style="margin-right:6em">
+// 2000ms
+// flicker
+// 1000ms
+// flicker
+// <img src="/client/rare_earth/Pictures/Mines/illegal mine in china.jpg" height=60%> <img src="https://i.giphy.com/vlElGnlJsW87u.gif" height=60%>
+// 2000ms
+// flicker 6000 6000
+// <img src="/client/rare_earth/Pictures/Mines/_Die Heimat der Seltenen Erden heißt Sie willkommen_-Damao, China.jpg" height=60%>
+// 6000ms
+// &nbsp;
+// 1000ms
+// goto -30
