@@ -515,8 +515,8 @@ function http_get(url, callback) {
  UTIL FUNCTIONS - SCRIPT SPECIFIC
 *************************************************/
 function url_is_img(url) {
-    ext3 = url.substr(-3).toUpperCase();
-    ext4 = url.substr(-4).toUpperCase();
+    ext3 = url.trim().substr(-3).toUpperCase();
+    ext4 = url.trim().substr(-4).toUpperCase();
     return (ext3 == "PNG" || ext3 == "JPG" || ext3 == "GIF" || ext3 == "BMP" || ext4 == "JPEG");
 }
 var win;
@@ -770,8 +770,8 @@ function conductor() {
         position += 1;
         conductor();
     }
-    else if (line.indexOf('ms')>0 && ! isNaN( line.replace('ms','') ) ) {
-        log('conductor', 'WAIT ms', line+' '+(new Date()).getTime());
+    else if ( ! isNaN( line.replace('ms','') ) ) {
+        log('conductor', 'WAIT', line);
         // eg. 4000ms means wait for 4000ms before continuing
         // if (i_am_master) master_emit_init(position+1);
         conductor_timeout = window.setTimeout(function(){position+=1;conductor()}, parseInt(line.replace('ms','')));
