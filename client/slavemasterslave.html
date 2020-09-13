@@ -29,7 +29,7 @@ on top.
 <html>
 <body>
     <script>
-var LIVE = false;
+var LIVE = true;
 var TRANSMEDIALE = true;
 var PRAHA = true;
 var MULTISCRIPT = true; // allows editor to choose which script file is master atm
@@ -198,6 +198,8 @@ function setup_socket() {
             return; // when 0 from server let clients go their own route
     });
     socket.on('force', function (newstate) {
+        if (DEBUG)
+            socket.emit('ack_force');
         if (i_am_master) {
             // master sent the force so can ignore
             document.getElementById('slide').innerText = newstate.slide;
@@ -390,6 +392,7 @@ function setup_master_control() {
         document.getElementById('slidelistboxtable').width=null;
         document.getElementById('slidelistbox').style.width='99%';
         // document.getElementById('slidelistboxtable').style.width="1px";
+        // would like to set controlbox to fixed so we can see messages under, but then we would be unable to scroll
         controlbox.style.position   = "relative";
         if (is_iOS||is_Android) {
             controlbox.style.fontSize   = "33pt";
@@ -435,7 +438,7 @@ function preloadimages(script) {
         else if (line.substr(0,5) == "video") {
             var urls = line.split(/\s+/);
             url = (is_iOS||is_Android) ? urls[2] : urls[1];
-            if (url == 'about:blank')
+            if (url == 'about:blank' || url == 'stop')
                 continue
             log('preloadvideo', is_iOS, is_Android, url);
             if (is_iOS||is_Android) {
@@ -680,7 +683,11 @@ function conductor() {
     if (typeof script == 'undefined' || !script_recieved || !master_state_ready || !loading_seq_complete) {
         // page not loaded yetmessage
         log('conductor','waiting for script & master_state');
+        // this fixes a bug when images skip over a line
+        // but also im trying to fix a ios bug so going back to old
         conductor_timeout = window.setTimeout(conductor, 1000);
+        //oldmethod
+        //window.setTimeout(conductor, 100);
         return;
     }
     // Loop Until script is ready, and master_state_ready
@@ -712,18 +719,19 @@ function conductor() {
 
     line = script[position];
     // audio_stop();
-    slide.innerText = line.substr(0,30)+"  ["+(position)+"] ";
-    if (show_slide_prev)
-        slide.innerText= script[position>0?position-1:0].substr(0,20)+"  ["+(position-1)+"]\n"+slide.innerText;
-    if (i_am_master)
+    if (i_am_master) {
+        slide.innerText = line.substr(0,30)+"  ["+(position)+"] ";
+        if (show_slide_prev)
+            slide.innerText= script[position>0?position-1:0].substr(0,20)+"  ["+(position-1)+"]\n"+slide.innerText;
         highlight_step();
+    }
 
     // wait line means loop until someone pushes position forward
     // push could happen from master_conducter or user interaction
     if (line.substr(0,4) == 'wait') {
         // wait for master conductor or user to change something
         window.clearTimeout(conductor_timeout);
-        conductor_timeout = window.setTimeout(conductor, 100);
+        conductor_timeout = window.setTimeout(conductor, 300);
         return;
     }
     else {
@@ -770,7 +778,7 @@ function conductor() {
         position += 1;
         conductor();
     }
-    else if ( ! isNaN( line.replace('ms','') ) ) {
+    else if (line.indexOf('ms')>0 &&  ! isNaN( line.replace('ms','') ) ) {
         log('conductor', 'WAIT', line);
         // eg. 4000ms means wait for 4000ms before continuing
         // if (i_am_master) master_emit_init(position+1);
@@ -794,6 +802,8 @@ function conductor() {
             var arg2 = args[2];
         if (args.length >= 4)
             var arg3 = args[3];
+        if (args.length >= 5)
+            var arg4 = args[4];
 
         var isimage = url_is_img(url);
 
@@ -808,16 +818,23 @@ function conductor() {
         if ( typeof arg2 != 'undefined') {
             if      (arg2.indexOf("popup") >= 0)       popup       = true;
             else if (arg2.indexOf("interactive") >= 0) interactive = true;
-            else if (arg1.indexOf("transparent") >= 0) keep_layer_1 = true;
+            else if (arg2.indexOf("transparent") >= 0) keep_layer_1 = true;
             else if (arg2.indexOf("width_") >= 0)      width       = arg2.substr(6);
             else if (arg2.indexOf("height_") >= 0)     height      = arg2.substr(7);
         }
         if ( typeof arg3 != 'undefined') {
             if      (arg3.indexOf("popup") >= 0)       popup       = true;
             else if (arg3.indexOf("interactive") >= 0) interactive = true;
-            else if (arg1.indexOf("transparent") >= 0) keep_layer_1 = true;
+            else if (arg3.indexOf("transparent") >= 0) keep_layer_1 = true;
             else if (arg3.indexOf("width_") >= 0)      width       = arg3.substr(6);
             else if (arg3.indexOf("height_") >= 0)     height      = arg3.substr(7);
+        }
+        if ( typeof arg4 != 'undefined') {
+            if      (arg4.indexOf("popup") >= 0)       popup       = true;
+            else if (arg4.indexOf("interactive") >= 0) interactive = true;
+            else if (arg4.indexOf("transparent") >= 0) keep_layer_1 = true;
+            else if (arg4.indexOf("width_") >= 0)      width       = arg4.substr(6);
+            else if (arg4.indexOf("height_") >= 0)     height      = arg4.substr(7);
         }
         if (popup == true) {
             if (isNaN(width))  width  = default_popup_width;
@@ -834,7 +851,9 @@ function conductor() {
             if (!keep_layer_1)
                 frame_1.style.display = "none";
             frame_image.style.display = "block";
-            var imghtml =  "<img id=image style='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);' src='"+url+"'";
+            var imghtml =  "<img id=image src='"+url+"'";
+            // noticed that this version on older phones the transform part does not work: so if you really want to give the option to have images center without 100% tag then you should check on older methods to center
+            //var imghtml =  "<img id=image style='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);' src='"+url+"'";
             if (width.length > 0)  imghtml += ' width='+width;
             if (height.length > 0) imghtml += ' height='+height;
             frame_image.innerHTML = imghtml+'>';
@@ -1524,7 +1543,8 @@ var loading_handle         = null;
 var loading_garbage_handle = null;
 var loading_is_on          = false;
 var loading_seq_complete   = false;
-var loading_seq_ms         = LIVE ? 10000 : 2000;
+// var loading_seq_ms         = LIVE ? 10000 : 2000;
+var loading_seq_ms         = LIVE ? 100 : 2000;
 var loading_seq_handle     = null;
 var frame_loading, loading_media;
 function loading_show() {
@@ -1616,6 +1636,7 @@ body {
     background-color: rgba(222,222,222,0.8);
     font-size:        14pt;
     padding:          10;
+    padding-left:     30;
     text-align:       right;
     font-family: monospace;
 

@@ -10,13 +10,14 @@ test -e /etc/nginx/sites-available/captiveportal_http \
 server {
   server_name
     clients3.google.com clients.l.google.com connectivitycheck.android.com connectivitycheck.gstatic.com play.googleapis.com www.google.com
-    apple.com captive.apple.com
+    apple.com captive.apple.com www.apple.com
     detectportal.firefox.com
     www.msftncsi.com
     ;
   listen 80;
   location / {
     proxy_set_header X-Forwarded-For \$remote_addr;
+    proxy_set_header Host \$host;
     proxy_pass http://127.0.0.1:8083;
   }
 }
@@ -251,7 +252,7 @@ def my_do_get(self):
     #   self.wfile.write(response)
   elif self.headers['Host'].find('apple.com') >= 0: 
     #and self.path.startswith('/index.htm'): 
-      response = """<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>"""
+      response = "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>"
       self.send_response(200)
       self.send_header('Content-type', 'text/html')           
       self.send_header('Content-length', str(len(response)))

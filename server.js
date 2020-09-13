@@ -1,4 +1,4 @@
-var LIVE = false;
+var LIVE = true;
 var TRANSMEDIALE = true;
 var PRAHA = true; // also enable TRANSMEDIALE since this a revision of that
 var MULTISCRIPT = true; // allows editor to choose which script file is master atm
@@ -11,7 +11,7 @@ var passcode = require('./passcode.js');
 //"AusADUTNAOW" : "testing"; // poor mans passcode
 //var passcode = "AusADUTNAOW";// : "testin"; // poor mans passcode
 
-// BUGBUG: self sync not working exactly as expected. something to do with client thresholds
+// BUGBUG: self sync not wosafarirking exactly as expected. something to do with client thresholds
 var breathing_self_sync  = true; // when false breath sequence end only when master says so
 
 var fs = require('fs');
@@ -530,6 +530,11 @@ io.sockets.on('connect', function (socket) {
                 socket.emit('debug', "invalid passcode");
         }
     });
+    if (DEBUG) {
+    socket.on('ack_force', function(data){
+        console.log('ack_force');
+    })
+    }
     socket.on('set_force', function(data){
         if (isPasscodeValid(data.passcode)) {
             console.log('set_force and broadcast', data);
