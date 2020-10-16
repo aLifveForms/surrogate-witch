@@ -29,12 +29,15 @@ on top.
 <html>
 <body>
     <script>
-var LIVE = true;
-var TRANSMEDIALE = true;
+var LIVE = false;
+var TRANSMEDIALE = false; // true = breathing fake
 var PRAHA = true;
 var MULTISCRIPT = true; // allows editor to choose which script file is master atm
 
-var BREATH_BUTTON_HIDE = true;
+if (TRANSMEDIALE)
+    var BREATH_BUTTON_HIDE = true; // turn this to false to show breathing button
+else
+    var BREATH_BUTTON_HIDE = false; // turn this to false to show breathing button
 // BUGBUG: transparent bacgkround should show hide site
 
 /************************************************
@@ -1733,12 +1736,12 @@ body {
     opacity:     0;
     font-family: monospace;
     box-shadow: none;
-border-radius: 0;
-text-shadow: -4px 4px #ccc;
-border-radius: 8px;
-/*transmediale: */
-/*box-shadow: inset 0 0 0 4px #669;*/
-box-shadow: inset 0 0 0 4px #ccc;
+    border-radius: 0;
+    text-shadow: -2px 2px #ccc;
+    border-radius: 8px;
+    /*transmediale: */
+    /*box-shadow: inset 0 0 0 4px #669;*/
+    box-shadow: inset 0 0 0 4px #ccc;
 }
 .breath {
     background-color: #eee;

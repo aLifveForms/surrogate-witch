@@ -1,5 +1,5 @@
 var LIVE = true;
-var TRANSMEDIALE = true;
+var TRANSMEDIALE = false; // true = breathing starts breathfake clients
 var PRAHA = true; // also enable TRANSMEDIALE since this a revision of that
 var MULTISCRIPT = true; // allows editor to choose which script file is master atm
 
@@ -213,6 +213,23 @@ app.get(['/captiveportalok','/captiveportalok/:ip'], function (req, res) {
 app.get('/captiveportal204', function (req, res) {
     console.log('captiveportal204')
     res.status(204).send();
+});
+// handle microsoft
+// handle apple.com and older www.apple.com
+//   www.apple.com /library/test/success.html 192.168.22.82
+//   10.0.0.1 - - [13/Sep/2020 13:43:52] "GET /library/test/success.html HTTP/1.0" 200 -
+app.get(['/success.html','/library/test/success.html'], function (req, res) {
+    console.log('captiveportal success.html apple.com captive.apple.com www.apple.com')
+    res.end('<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>');
+});
+// detectportal.firefox.com
+app.get('/success.txt', function (req, res) {
+    console.log('captiveportal success.txt detectportal.firefox.com')
+    res.end('success');
+});
+app.get('/ncsi.txt', function (req, res) {
+    console.log('captiveportal ncsi.txt microsoft')
+    res.end('Microsoft NCSI');
 });
 
 
