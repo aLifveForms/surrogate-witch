@@ -1,4 +1,4 @@
-var LIVE = true;
+var LIVE = false; // if false only 2 active breathers required
 var TRANSMEDIALE = false; // true = breathing starts breathfake clients
 var PRAHA = true; // also enable TRANSMEDIALE since this a revision of that
 var MULTISCRIPT = true; // allows editor to choose which script file is master atm
