@@ -1,5 +1,10 @@
 # surrogate-witch
 
+- [Install and run](#install-and-run)
+- [Access](#access)
+- [Script](#script)
+  - [Basic commands](#basic-commands)
+  - [Examples](#examples)
 ## Install and run
 
     npm install
@@ -17,7 +22,7 @@
 
 Each line in a script is a command to the client display system. This means that everything for a certain slide must be on one line. The first word of line in script determines what type of command or content: 
 
-**Basic commands**
+### Basic commands
 * `https://...url...`  
   display web page
 * `/image/location.jpg`  
@@ -65,28 +70,41 @@ Each line in a script is a command to the client display system. This means that
   jump backward 5 slides
 
 
-**Complex structures**
+### Examples
 
-> `<br><center>1821 <b>Bauxite</b> discovered near Les Beaux in southern France by <b>Pierre Berthier</b> background_transparent`  
+* **Formatted text:**  
+  `<br><center>1821 <b>Bauxite</b> discovered near Les Beaux in southern France by <b>Pierre Berthier</b> background_transparent`
 
-text can include html for complex text. example changes font color and background color.
+  text can include html for complex text. example changes font color and background color.
 
-> `Press the button`  
-`2000ms`  
-`<button onclick="goto(position+2)">Press me<button>`  
-`6000ms`  
-`goto -4`  
-`you exited lo`  
+* **Loop with button to jump out of loop:**  
+  `Press the button`  
+  `2000ms`  
+  `<button onclick="goto(position+2)">Press me<button>`  
+  `6000ms`  
+  `goto -4`  
+  `you exited lo`  
+  
+  User has 6 seconds to press button, else script jumps back 4 lines
 
-User has 6 seconds to press button, else script jumps back 4 lines
+* **Load URL as content:**  
+  `http://johannespaulraether.net`  
+  
+  A URL given as the start of a script line will load the url into the main message layer. The page is not interactive; users cannot click or explore. To make interactive add the **interactive** optoin on the same line directly after url.
 
+* **Load youtube in popup:**  
+  `https://www.youtube.com/embed/sxbi6seSir4?start=144&autoplay=1 popup width_600 height_300 `  
+  
+  The URL with the **popup** option on the same line says to open a popup window, here window is **600** pixels wide and **300** pixels high and make the youtube video the source. It is important in this case that the youtube URL has "**autoplay=1**" so that playing starts without user interaction. 
 
-### Examles
+  The width and height commands are optional. "**popup**" is also option and if it isn't there then the URL will be loaded into the current window.
 
-`http://johannespaulraether.net`  
-A URL given as the start of a script line will load the url into the main message layer. The page is not interactive; users cannot click or explore. To make interactive add the **interactive** optoin on the same line directly after url.
+* **Loop video:**  
+  `video /client/Gallium_on_an_iPhone6_2000k_1024x.mp4 /client/Gallium_on_an_iPhone6_10_480_pal.gif loop autoplay muted webkit-playsinline width=100% height=100%`  
 
-`https://www.youtube.com/embed/sxbi6seSir4?start=144&autoplay=1` **popup** ` width_600 height_300 `  
-The URL with the **popup** option on the same line says to open a popup window, here window is **600** pixels wide and **300** pixels high and make the youtube video the source. It is important in this case that the youtube URL has "**autoplay=1**" so that playing starts without user interaction. 
+  Starts video, loop video on its end, muted, width and height defined
 
-The width and height commands are optional. "**popup**" is also option and if it isn't there then the URL will be loaded into the current window.
+* **Multiple images:**  
+  `<img src="/client/files/Bayan Obo1.jpg" height=30%> <img src="/client/files/Bayan Obo-crystal.jpg" height=50%>`
+  
+  Show two images side by side
