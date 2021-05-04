@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>surrogate-witch</title>
+        <style>
+/* From extension foam.foam-vscode */
+.foam-placeholder-link {
+  color: red;
+  cursor: default;
+}
+
+.foam-note-link,
+.foam-attachment-link {
+}
+
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="surrogate-witch">surrogate-witch</h1>
+<ul>
+<li><a href="#install-and-run">Install and run</a></li>
+<li><a href="#access">Access</a></li>
+<li><a href="#script">Script</a>
+<ul>
+<li><a href="#basic-commands">Basic commands</a></li>
+<li><a href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="install-and-run">Install and run</h2>
+<pre><code>npm install
+app_port=80 node server.js
+</code></pre>
+<h2 id="access">Access</h2>
+<ul>
+<li>user: <a href="http://ptxx.cc">http://ptxx.cc</a></li>
+<li>master: <a href="http://ptxx.cc/master">http://ptxx.cc/master</a>
+<ul>
+<li>Open script list with &quot;+&quot; in top right</li>
+<li>Hold ctrl+click a script line will force <strong>all</strong> connected clients to jump to that line in script. All new clients, and any client that refreshes their browser. will start from that line.</li>
+</ul>
+</li>
+<li>editor: <a href="http://ptxx.cc/editor">http://ptxx.cc/editor</a></li>
+</ul>
+<h2 id="script">Script</h2>
+<p>Each line in a script is a command to the client display system. This means that everything for a certain slide must be on one line. The first word of line in script determines what type of command or content:</p>
+<h3 id="basic-commands">Basic commands</h3>
+<ul>
+<li>
+<p><code>https://...url...</code><br>
+display web page</p>
+</li>
+<li>
+<p><code>/image/location.jpg</code><br>
+<code>/image/location.png</code><br>
+<code>/image/location.gif</code><br>
+display image</p>
+</li>
+<li>
+<p><code>/image/location.jpg width_100% height_100%</code><br>
+display image with specific dimensions, percentages or pixels</p>
+</li>
+<li>
+<p><code>/directory/location/ interactive</code><br>
+display directory, list of files therein. Allow user to interact with list.</p>
+</li>
+<li>
+<p><code>1000ms</code><br>
+hold/pause script for 1 second</p>
+</li>
+<li>
+<p><code>wait</code><br>
+stop here. requires master to get past, or button with goto command</p>
+</li>
+<li>
+<p><code>Some text to show user</code><br>
+display text</p>
+</li>
+<li>
+<p><code>Some text fontcolor_#cccccc</code><br>
+display text, make text color gray</p>
+</li>
+<li>
+<p><code>Some text background_#0000ff</code><br>
+display text, make background color blue</p>
+</li>
+<li>
+<p><code>no_message</code><br>
+remove message window (will show background page)</p>
+</li>
+<li>
+<p><code>&amp;nbsp;</code><br>
+delete message, empty message</p>
+</li>
+<li>
+<p><code>no_popup</code><br>
+close popup</p>
+</li>
+<li>
+<p><code>flicker</code><br>
+flicker background</p>
+</li>
+<li>
+<p><code>video /client/files/videofile.mp4 autoplay</code><br>
+load and play video</p>
+</li>
+<li>
+<p><code>audio /client/files/videofile.mp3</code><br>
+load and play audio, continue with script</p>
+</li>
+<li>
+<p><code>audio stop</code></p>
+</li>
+<li>
+<p><code>video stop</code></p>
+</li>
+<li>
+<p><code>audio /client/files/videofile.mp3 wait</code><br>
+load and play audio, <em>wait</em> for finish, then after go to next script line</p>
+</li>
+<li>
+<p><code>audio /client/files/videofile.mp3 next</code><br>
+load and play audio, wait for finish, then after go to <em>next</em> script line</p>
+</li>
+<li>
+<p><code>audio /client/files/videofile.mp3 goto -10</code><br>
+load and play audio, wait for finish, then after <em>go back</em> 10 script lines</p>
+</li>
+<li>
+<p><code>audio /client/files/videofile.mp3 goto +10</code><br>
+load and play audio, wait for finish, then after <em>go forward</em> 10 script lines</p>
+</li>
+<li>
+<p><code>goto -5</code><br>
+jump backward 5 slides</p>
+</li>
+</ul>
+<h3 id="examples">Examples</h3>
+<ul>
+<li>
+<p><strong>Formatted text:</strong><br>
+<code>&lt;br&gt;&lt;center&gt;1821 &lt;b&gt;Bauxite&lt;/b&gt; discovered near Les Beaux in southern France by &lt;b&gt;Pierre Berthier&lt;/b&gt; background_transparent</code></p>
+<p>text can include html for complex text. example changes font color and background color.</p>
+</li>
+<li>
+<p><strong>Loop with button to jump out of loop:</strong><br>
+<code>Press the button</code><br>
+<code>2000ms</code><br>
+<code>&lt;button onclick=&quot;goto(position+2)&quot;&gt;Press me&lt;button&gt;</code><br>
+<code>6000ms</code><br>
+<code>goto -4</code><br>
+<code>you exited lo</code></p>
+<p>User has 6 seconds to press button, else script jumps back 4 lines</p>
+</li>
+<li>
+<p><strong>Load URL as content:</strong><br>
+<code>http://johannespaulraether.net</code></p>
+<p>A URL given as the start of a script line will load the url into the main message layer. The page is not interactive; users cannot click or explore. To make interactive add the <strong>interactive</strong> optoin on the same line directly after url.</p>
+</li>
+<li>
+<p><strong>Load youtube in popup:</strong><br>
+<code>https://www.youtube.com/embed/sxbi6seSir4?start=144&amp;autoplay=1 popup width_600 height_300 </code></p>
+<p>The URL with the <strong>popup</strong> option on the same line says to open a popup window, here window is <strong>600</strong> pixels wide and <strong>300</strong> pixels high and make the youtube video the source. It is important in this case that the youtube URL has &quot;<strong>autoplay=1</strong>&quot; so that playing starts without user interaction.</p>
+<p>The width and height commands are optional. &quot;<strong>popup</strong>&quot; is also option and if it isn't there then the URL will be loaded into the current window.</p>
+</li>
+<li>
+<p><strong>Loop video:</strong><br>
+<code>video /client/Gallium_on_an_iPhone6_2000k_1024x.mp4 /client/Gallium_on_an_iPhone6_10_480_pal.gif loop autoplay muted webkit-playsinline width=100% height=100%</code></p>
+<p>Starts video, loop video on its end, muted, width and height defined</p>
+</li>
+<li>
+<p><strong>Multiple images:</strong><br>
+<code>&lt;img src=&quot;/client/files/Bayan Obo1.jpg&quot; height=30%&gt; &lt;img src=&quot;/client/files/Bayan Obo-crystal.jpg&quot; height=50%&gt;</code></p>
+<p>Show two images side by side</p>
+</li>
+</ul>
+
+    </body>
+    </html>
