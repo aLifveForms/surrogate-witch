@@ -18,72 +18,50 @@
 Each line in a script is a command to the client display system. This means that everything for a certain slide must be on one line. The first word of line in script determines what type of command or content: 
 
 **Basic commands**
-
-`https://...url...`  
+* `https://...url...`  
   display web page
-
-`/image/location.jpg`  
+* `/image/location.jpg`  
   `/image/location.png`  
   `/image/location.gif`  
   display image
-
-`/image/location.jpg width_100% height_100%`  
+* `/image/location.jpg width_100% height_100%`  
   display image with specific dimensions, percentages or pixels
-
-`/directory/location/ interactive`  
+* `/directory/location/ interactive`  
   display directory, list of files therein. Allow user to interact with list.
 
-
-`1000ms`  
+* `1000ms`  
   hold/pause script for 1 second
-
-`wait`  
+* `wait`  
   stop here. requires master to get past, or button with goto command
-
-`Some text to show user`  
+* `Some text to show user`  
   display text
-
-`Some text fontcolor_#cccccc`  
+* `Some text fontcolor_#cccccc`  
   display text, make text color gray
-
-`Some text background_#0000ff`  
+* `Some text background_#0000ff`  
   display text, make background color blue
-
-`no_message`  
+* `no_message`  
   remove message window (will show background page)
-
-`&nbsp;`  
+* `&nbsp;`  
   delete message, empty message
-
-`no_popup`  
+* `no_popup`  
   close popup
-
-`flicker`  
+* `flicker`  
   flicker background
-
-`video /client/files/videofile.mp4 autoplay`  
+* `video /client/files/videofile.mp4 autoplay`  
   load and play video
-
-`audio /client/files/videofile.mp3`  
+* `audio /client/files/videofile.mp3`  
   load and play audio, continue with script
-
-`audio stop`  
-
-`video stop`
-
-`audio /client/files/videofile.mp3 wait`  
+* `audio stop`  
+* `video stop`
+* `audio /client/files/videofile.mp3 wait`  
   load and play audio, _wait_ for finish, then after go to next script line
-
-`audio /client/files/videofile.mp3 next`   
+* `audio /client/files/videofile.mp3 next`   
   load and play audio, wait for finish, then after go to _next_ script line
-
-`audio /client/files/videofile.mp3 goto -10`  
+* `audio /client/files/videofile.mp3 goto -10`  
   load and play audio, wait for finish, then after _go back_ 10 script lines
-
-`audio /client/files/videofile.mp3 goto +10`  
+* `audio /client/files/videofile.mp3 goto +10`  
   load and play audio, wait for finish, then after _go forward_ 10 script lines
-
-`goto -5`  
+* `goto -5`  
   jump backward 5 slides
 
 
