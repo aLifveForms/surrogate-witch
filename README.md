@@ -20,7 +20,7 @@
 
 ## Script
 
-Each line in a script is a command to the client display system. This means that everything for a certain slide must be on one line. The first word of line in script determines what type of command or content. Example script may look like this:
+Each line in a script is a command to the client display system. This means that everything for a certain slide must be on one line. The first word a of line in the script determines what type of command or content. Example script may look like this:
 
     hi
     2000ms
